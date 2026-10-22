@@ -130,9 +130,10 @@ body+=note('시험에서 “조직형·반분리형·내장형”은 <b>개발 �
 body+='''<div class="matrix-wrap"><table><caption class="caption">Basic COCOMO 81 계수</caption><thead><tr><th>개발 유형</th><th>노력 E = a × KLOCᵇ</th><th>기간 D = 2.5 × Eᵈ</th></tr></thead><tbody><tr><td>조직형</td><td>a = 2.4 / b = 1.05</td><td>d = 0.38</td></tr><tr><td>반분리형</td><td>a = 3.0 / b = 1.12</td><td>d = 0.35</td></tr><tr><td>내장형</td><td>a = 3.6 / b = 1.20</td><td>d = 0.32</td></tr></tbody></table></div><div class="calc"><h3>직접 비교하는 Basic COCOMO</h3><p class="caption">1 KLOC = 소스 코드 1,000줄 · E의 단위는 인월(Person-Month)</p><div class="calc-controls"><label>개발 유형<select id="cocomo-mode"><option value="0">조직형 · Organic</option><option value="1">반분리형 · Semi-detached</option><option value="2">내장형 · Embedded</option></select></label><label>규모 (KLOC)<input id="cocomo-size" type="number" min="0.1" max="10000" step="0.1" value="10" inputmode="decimal"></label></div><div class="results" aria-live="polite"><div><span>총 개발 노력</span><output id="effort">26.93</output><small>인월</small></div><div><span>개발 기간</span><output id="duration">8.74</output><small>개월</small></div><div><span>평균 투입 인원 ≈ E ÷ D</span><output id="people">3.08</output><small>명 · 단순 평균</small></div></div><p id="cocomo-formula" class="formula"></p></div>'''
 chapters.append(section('cocomo','03','COCOMO 모형','개발 유형 3가지와 추정 상세 수준 3가지를 서로 다른 축으로 기억합니다.',body,source('IIT Kharagpur · Estimation of project metrics','https://vlabs.iitkgp.ac.in/sevl/Exp2/theory.html')+source('IPA · COCOMO 81 / II 비교','https://www.ipa.go.jp/archive/files/000024479.pdf')))
 
-# 04. The seven design patterns selected for review.
+# 04. The eight design patterns selected for review.
 patterns=[
- ('생성','팩토리 메서드','Factory Method',['부모 생성 규약','자식의 생성'],'생성 인터페이스를 정의하고, <b>하위 클래스가 생성할 클래스</b>를 결정.','팩토리 = 생성 결정을 자식에게'),
+ ('생성','팩토리 메서드','Factory Method',['부모 생성 규약','자식의 생성'],'생성 인터페이스를 정의하고, <b>하위 클래스가 생성할 클래스</b>를 결정.','팩토리 메서드 = 생성 결정을 자식에게'),
+ ('생성','추상 팩토리','Abstract Factory',['윈도 공장','맥 공장'],'구체 클래스를 직접 지정하지 않고 <b>서로 관련된 제품군을 생성하는 인터페이스</b>를 제공. 공장을 바꾸면 버튼·체크박스를 같은 계열로 생성한다.','추상 팩토리 = 관련 제품군을 한 계열로'),
  ('구조','퍼사드 / 파사드','Facade',['사용자','단일 창구','서브시스템'],'복잡한 서브시스템에 <b>단순한 통합 인터페이스</b> 제공.','여러 기능의 앞문 하나'),
  ('구조','프록시','Proxy',['사용자','대리 객체','실제 객체'],'실제 객체 대신 접근하여 <b>접근·생성·원격 호출 등을 제어</b>.','대리인이 접근 관리'),
  ('구조','데코레이터','Decorator',['원래 객체','기능 감싸기'],'객체를 감싸서 <b>책임·기능을 동적으로 추가</b>.','장식은 중첩 가능'),
@@ -140,6 +141,12 @@ patterns=[
  ('구조','플라이웨이트','Flyweight',['객체 A·B·C','공유 핵심 상태'],'공유 가능한 상태를 나눠 써서 <b>다수 객체의 메모리 절약</b>.','공통 상태 공유 / 외부 상태 분리'),
  ('행위','옵저버 / 관찰자','Observer',['대상 변경','관찰자 A·B'],'대상의 상태 변화 시 등록된 객체들에 <b>변경을 통지</b>.','일대다 알림')]
 def pattern_visual(en,labels):
+    if en=='Abstract Factory':
+        s=txt(180,17,'공장 교체 → 같은 계열의 제품 생성','muted')
+        for y,family in [(40,'윈도'),(116,'맥')]:
+            s+=rect(12,y+12,110,38,family+' 공장','node accent')+line(122,y+31,150,y+31,arrow=True)
+            s+=rect(155,y,193,62,'','zone')+txt(251,y+25,family+' 버튼')+txt(251,y+48,family+' 체크박스')
+        return svg(s,'윈도 공장은 윈도 버튼과 체크박스를, 맥 공장은 맥 버튼과 체크박스를 생성한다.',h=190)
     if en in ['Observer','Flyweight']:
         mid={'Observer':'대상','Flyweight':'공유 상태'}[en]
         s=rect(123,6,114,38,mid,'node accent')
@@ -149,15 +156,17 @@ def pattern_visual(en,labels):
         return svg(s,labels[0]+'와 '+labels[-1]+'의 관계',h=131)
     if en=='Decorator':return svg(rect(34,8,292,112,'','zone')+txt(180,32,'장식 B')+rect(65,41,230,63,'','node accent')+txt(180,61,'장식 A')+rect(102,71,156,29,'원래 객체'),'원래 객체를 장식 A와 B가 겹쳐 감싼 구조',h=131)
     return flow(labels)
-body='<div class="ribbon"><div><h3>선택한 생성 패턴</h3><span class="big">1개</span>팩토리 메서드</div><div class="high"><h3>선택한 구조 패턴</h3><span class="big">5개</span>퍼사드 · 프록시 · 데코레이터<br>브리지 · 플라이웨이트</div><div class="mid"><h3>선택한 행위 패턴</h3><span class="big">1개</span>옵저버</div></div><p class="caption">선택한 7개만 정리했다. 팩토리는 Factory Method 기준이다. 아래 화살표는 설명 그림이며, 정식 UML 관계 기호를 뜻하지 않는다.</p>'
-for category,cls,memo in [('생성','','팩토리'),('구조','structural','퍼 · 프 · 데 · 브 · 플'),('행위','behavioral','옵저버')]:
+body='<div class="ribbon"><div><h3>선택한 생성 패턴</h3><span class="big">2개</span>팩토리 메서드 · 추상 팩토리</div><div class="high"><h3>선택한 구조 패턴</h3><span class="big">5개</span>퍼사드 · 프록시 · 데코레이터<br>브리지 · 플라이웨이트</div><div class="mid"><h3>선택한 행위 패턴</h3><span class="big">1개</span>옵저버</div></div><p class="caption">선택한 8개를 정리했다. 두 팩토리는 생성 결정과 제품군 생성이라는 목적의 차이로 구분한다. 아래 화살표는 설명 그림이며, 정식 UML 관계 기호를 뜻하지 않는다.</p>'
+for category,cls,memo in [('생성','','팩토리 메서드 · 추상 팩토리'),('구조','structural','퍼 · 프 · 데 · 브 · 플'),('행위','behavioral','옵저버')]:
     count=sum(1 for x in patterns if x[0]==category)
     body+=f'<div class="category-title {cls}"><span class="num">{count:02}</span><div><h3>{category} 패턴</h3><div class="en">암기 순서 · {memo}</div></div></div><div class="patterns">'
     for cat,title,en,labels,desc,cue in patterns:
         if cat==category: body+=card(title,en,pattern_visual(en,labels),desc+f'<div class="pattern-cue">↳ {cue}</div>')
     body+='</div>'
-body+=note('<b>퍼사드</b>는 창구 단순화, <b>프록시</b>는 접근 제어, <b>데코레이터</b>는 기능 추가, <b>브리지</b>는 추상·구현 분리, <b>플라이웨이트</b>는 공통 상태 공유. <b>팩토리 메서드</b>는 생성 결정, <b>옵저버</b>는 변경 통지.')
-chapters.append(section('patterns','04','디자인 패턴 7종','팩토리 메서드 · 퍼사드 · 프록시 · 데코레이터 · 브리지 · 플라이웨이트 · 옵저버',body,source('GoF 원저 출판사 · 패턴 목차','https://www.informit.com/store/design-patterns-elements-of-reusable-object-oriented-9780321770462')+source('Pearson · 패턴 의도와 예시','https://www.informit.com/store/design-patterns-in-java-9780321947925')))
+    if category=='생성':
+        body+='<div class="matrix-wrap"><table><caption class="caption">팩토리 메서드와 추상 팩토리 비교</caption><thead><tr><th>구분</th><th>팩토리 메서드</th><th>추상 팩토리</th></tr></thead><tbody><tr><th>핵심 목적</th><td>생성할 구체 클래스를<br>하위 클래스가 결정</td><td>함께 쓸 관련 제품군을<br>일관된 계열로 생성</td></tr><tr><th>그림 예시</th><td>문서 생성 메서드를 재정의<br>→ PDF 문서 또는 HTML 문서</td><td>UI 공장을 교체<br>→ 윈도 버튼·체크박스 또는 맥 버튼·체크박스</td></tr><tr><th>시험 키워드</th><td>하위 클래스 · 생성 메서드 재정의</td><td>관련 객체들의 집합 · 제품군 · 구체 클래스 지정 없이 생성</td></tr></tbody></table></div>'
+body+=note('<b>퍼사드</b>는 창구 단순화, <b>프록시</b>는 접근 제어, <b>데코레이터</b>는 기능 추가, <b>브리지</b>는 추상·구현 분리, <b>플라이웨이트</b>는 공통 상태 공유. <b>팩토리 메서드</b>는 생성 결정, <b>추상 팩토리</b>는 관련 제품군 생성, <b>옵저버</b>는 변경 통지.')
+chapters.append(section('patterns','04','디자인 패턴 8종','팩토리 메서드 · 추상 팩토리 · 퍼사드 · 프록시 · 데코레이터 · 브리지 · 플라이웨이트 · 옵저버',body,source('GoF 원저 출판사 · 패턴 목차','https://www.informit.com/store/design-patterns-elements-of-reusable-object-oriented-9780321770462')+source('GoF 원저 · Abstract Factory 발췌','https://www.informit.com/articles/article.aspx?p=1398599')+source('Pearson · 패턴 의도와 예시','https://www.informit.com/store/design-patterns-in-java-9780321947925')))
 
 # 05. Networks: extent and topology use independent classification axes.
 body='<h3 class="subhead">A. 범위로 나누기 <small>얼마나 넓게 연결하는가?</small></h3>'

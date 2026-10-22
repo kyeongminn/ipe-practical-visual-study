@@ -17,7 +17,7 @@ TOPICS=[
  ('uml-rel','UML 관계','화살표와 끝 모양으로 읽는 6가지 관계','6가지 관계 + include · extend'),
  ('uml-types','UML 다이어그램','정적인 구조와 동적인 행위를 나누기','구조 7 + 행위 7 = 14종'),
  ('cocomo','COCOMO 모형','개발 유형과 추정 상세 수준을 구분하기','개발 유형 3 · 상세 수준 3'),
- ('patterns','디자인 패턴','선택한 7가지의 목적과 그림만 모아 보기','옵저버 · 퍼사드 · 프록시 · 팩토리 · 데코레이터 · 브리지 · 플라이웨이트'),
+ ('patterns','디자인 패턴','선택한 8가지의 목적과 그림만 모아 보기','팩토리 메서드 · 추상 팩토리 · 퍼사드 · 프록시 · 데코레이터 · 브리지 · 플라이웨이트 · 옵저버'),
  ('network','네트워크 종류','범위와 연결 모양, 전송 대상을 구분하기','범위 · 토폴로지 · 전송 대상'),
  ('whitebox','화이트박스 테스트','코드 구조와 명세로 테스트 기법 비교하기','화이트박스 · 블랙박스 기법 · 엣지/코너 케이스'),
  ('principles','소프트웨어 테스트 원리','테스트를 설계할 때 기억할 7가지 기준','결함 발견부터 사용자 요구까지'),
@@ -52,7 +52,7 @@ def compact_preview(key):
     if key=='cocomo':
         return '<div class="mini-scale"><div><b>조직형</b><span>익숙한 업무</span></div><i>→</i><div><b>반분리형</b><span>중간 성격</span></div><i>→</i><div><b>내장형</b><span>강한 제약</span></div></div><div class="mini-level">기본형 → 중간형 → 발전형</div><p class="mini-hint">규모 중심 → 비용 동인 → 단계별 보정</p>'
     if key=='patterns':
-        return '<div class="mini-patterns"><p><b>생성 1</b><span>팩토리 메서드</span></p><p><b>구조 5</b><span>퍼사드 · 프록시 · 데코레이터<br>브리지 · 플라이웨이트</span></p><p><b>행위 1</b><span>옵저버</span></p></div><p class="mini-hint">선택한 7종 · 개념 그림과 회차별 실기 기출<br>생성 결정 · 단일 창구 · 대리 · 기능 추가 · 분리 · 공유 · 알림</p>'
+        return '<div class="mini-patterns"><p><b>생성 2</b><span>팩토리 메서드 · 추상 팩토리</span></p><p><b>구조 5</b><span>퍼사드 · 프록시 · 데코레이터<br>브리지 · 플라이웨이트</span></p><p><b>행위 1</b><span>옵저버</span></p></div><p class="mini-hint">선택한 8종 · 개념 그림과 회차별 실기 기출<br>생성 결정 · 제품군 · 창구 · 대리 · 추가 · 분리 · 공유 · 알림</p>'
     if key=='network':
         return '<div class="mini-level">PAN → LAN → MAN → WAN</div><div class="mini-network"><span>✳ 성형</span><span>◯ 링형</span><span>━ 버스형</span><span>⑂ 트리형</span><span>⊠ 망형</span><span>⊞ 혼합형</span></div><p class="mini-hint">유니 · 브로드 · 멀티 · 애니캐스트<br>+ 애드혹 · Infrastructure · VPN</p>'
     if key=='whitebox':
