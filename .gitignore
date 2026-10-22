@@ -1,0 +1,12 @@
+# Publish only the visual-study page and its reproducible source.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/.nojekyll
+!/index.html
+!/정보처리기사_핵심이론_그림정리.html
+!/study-assets/
+/study-assets/*
+!/study-assets/*.py
+!/study-assets/verify_practical.cjs
