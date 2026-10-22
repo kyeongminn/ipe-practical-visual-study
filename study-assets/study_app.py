@@ -30,9 +30,13 @@ TOPICS=[
  ('attacks','공격 기법','공격 대상과 동작의 차이로 용어 구분하기','서비스 거부 · 도청·위장 · 웹 · 사회공학 · 악성코드'),
  ('storage','스토리지 연결 방식','서버와 저장장치를 어떻게 잇는가?','DAS · NAS · SAN'),
  ('security-protocols','보안 프로토콜','프로토콜 · 계층 · 한 줄 요약으로 비교','IPsec · SSL/TLS · HTTPS · SSH · 메일 보안 · 터널링'),
- ('osi-layers','OSI 7계층','물대네전세표응 · 1계층부터 7계층까지','역할 · 데이터 단위 · 장비 · MAC/IP/포트 · 캡슐화')]
+ ('osi-layers','OSI 7계층','물대네전세표응 · 1계층부터 7계층까지','역할 · 데이터 단위 · 장비 · MAC/IP/포트 · 캡슐화'),
+ ('algorithms','정렬·탐색 시간복잡도','평균 시간복잡도로 묶어 비교하기','정렬 9종 · 탐색 8종 · 최선/평균/최악 · 공간 · 안정성')]
 
 def compact_preview(key):
+    if key=='algorithms':
+        from algorithm_topic import algorithm_preview
+        return algorithm_preview()
     if key=='osi-layers':
         from osi_topic import osi_preview
         return osi_preview()
@@ -154,7 +158,8 @@ def build_app(css,defs,chapters,legacy_js):
     from storage_topic import build_storage_chapter
     from security_protocols import build_security_protocols_chapter
     from osi_topic import build_osi_chapter
-    chapters=[*chapters,build_security_chapter(),*build_drm_chapters(),build_routing_chapter(),build_version_control_chapter(),build_encryption_chapter(),build_attack_chapter(),build_storage_chapter(),build_security_protocols_chapter(),build_osi_chapter()]
+    from algorithm_topic import build_algorithm_chapter
+    chapters=[*chapters,build_security_chapter(),*build_drm_chapters(),build_routing_chapter(),build_version_control_chapter(),build_encryption_chapter(),build_attack_chapter(),build_storage_chapter(),build_security_protocols_chapter(),build_osi_chapter(),build_algorithm_chapter()]
     css+='\n.drm-overview .diagram{max-height:none;max-width:420px;margin:12px auto}\n@media print{.drm-overview .diagram{max-height:270px}}'
     topic_count=len(TOPICS)
     # Reuse the existing verified diagrams and detailed explanations.
