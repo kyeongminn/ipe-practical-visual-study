@@ -1,12 +1,15 @@
-# Publish only the visual-study page and its reproducible source.
+# Publish the two study pages and their reproducible source.
 /*
 !/.gitignore
 !/.gitattributes
 !/README.md
 !/.nojekyll
 !/index.html
+!/code-practice.html
+!/정처기_실기_코드문제풀이.html
 !/정보처리기사_핵심이론_그림정리.html
 !/study-assets/
 /study-assets/*
 !/study-assets/*.py
 !/study-assets/verify_practical.cjs
+!/study-assets/verify_code_practice.cjs

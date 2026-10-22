@@ -312,4 +312,6 @@ html = build_app(CSS, defs, chapters[:7], JS)
 OUT.write_text(html, encoding='utf-8', newline='\n')
 # GitHub Pages entry point, kept identical to the offline study document.
 (ROOT / 'index.html').write_text(html, encoding='utf-8', newline='\n')
+code_source = ROOT / '정처기_실기_코드문제풀이.html'
+(ROOT / 'code-practice.html').write_text(code_source.read_text(encoding='utf-8'), encoding='utf-8', newline='\n')
 print(f'Created: {OUT}\nSize: {OUT.stat().st_size:,} bytes\nSVG diagrams: {html.count("<svg")}\nConcepts: {len(TOPICS)}\nPractice questions: {sum(len(qs) for qs in BANK.values())}')

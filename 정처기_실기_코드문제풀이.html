@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>정처기 실기 코드 문제풀이</title>
+<meta name="description" content="정보처리기사 실기 코드·SQL·이론 문제를 풀고 정답과 해설을 확인하는 학습 페이지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 시험지 한 장(문제·답안 작성란)을 가운데에, 왼쪽에 OMR식 문항 지도. 채점은 빨간 펜(○ △ ／). */
+:root {
+  --bg: #eef1f5;
+  --sheet: #ffffff;
+  --ink: #1b2231;
+  --muted: #5a6477;
+  --line: #d9dee7;
+  --accent: #2b4a8b;
+  --accent-soft: #e4eaf6;
+  --pen: #d0362a;
+  --pen-soft: #fbe9e7;
+  --ok: #1d7f55;
+  --ok-soft: #e2f3ea;
+  --warn: #a8670b;
+  --warn-soft: #fbf0dc;
+  --code-bg: #f4f6fa;
+  --syn-kw: #8a2f9e;
+  --syn-type: #1f6a8a;
+  --syn-str: #2f7d32;
+  --syn-num: #b4580d;
+  --syn-com: #8a93a3;
+  --syn-fn: #2b4a8b;
+  --font-display: "Gowun Batang", "Nanum Myeongjo", serif;
+  --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Sans KR", Consolas, "D2Coding", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11141b; --sheet: #191e28; --ink: #e3e7ef; --muted: #98a1b3; --line: #2b3240;
+    --accent: #93acea; --accent-soft: #232c40; --pen: #ff6d5e; --pen-soft: #3a2220;
+    --ok: #4cc48c; --ok-soft: #1a3328; --warn: #e4a948; --warn-soft: #3a2f1b; --code-bg: #141821;
+    --syn-kw: #d29be6; --syn-type: #6fc1df; --syn-str: #8fd28f; --syn-num: #f0a868; --syn-com: #6b7487; --syn-fn: #93acea;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11141b; --sheet: #191e28; --ink: #e3e7ef; --muted: #98a1b3; --line: #2b3240;
+  --accent: #93acea; --accent-soft: #232c40; --pen: #ff6d5e; --pen-soft: #3a2220;
+  --ok: #4cc48c; --ok-soft: #1a3328; --warn: #e4a948; --warn-soft: #3a2f1b; --code-bg: #141821;
+  --syn-kw: #d29be6; --syn-type: #6fc1df; --syn-str: #8fd28f; --syn-num: #f0a868; --syn-com: #6b7487; --syn-fn: #93acea;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+button, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+/* 사이드바 */
+.side { display: grid; gap: 14px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+@media (max-width: 860px) { .side { position: static; } }
+.brand { display: grid; gap: 2px; }
+.brand h1 { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.3; margin: 0; text-wrap: balance; }
+.brand p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.study-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); font-size: 0.85rem; text-underline-offset: 3px; }
+.panel { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.stat b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; font-weight: 600; }
+.stat span { font-size: 0.75rem; color: var(--muted); }
+.stat.ok b { color: var(--ok); }
+.stat.bad b { color: var(--pen); }
+.bar { height: 6px; background: var(--code-bg); border-radius: 3px; overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; }
+.bar .g { background: var(--ok); }
+.bar .r { background: var(--pen); }
+
+.fgroup { display: grid; gap: 6px; }
+.fgroup > span { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 3px 11px; font-size: 0.82rem; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--sheet); }
+
+details.mapbox summary { cursor: pointer; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; list-style: none; display: flex; justify-content: space-between; }
+details.mapbox summary::after { content: "펼치기"; font-weight: 400; letter-spacing: 0; }
+details.mapbox[open] summary::after { content: "접기"; }
+.omr { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 10px; max-height: 300px; overflow-y: auto; padding: 2px; }
+.omr button {
+  aspect-ratio: 1; max-width: 100%; border: 1.5px solid var(--line); background: transparent; border-radius: 50%;
+  font-size: 0.58rem; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; padding: 0; color: var(--muted); font-family: var(--font-mono);
+}
+.omr button.correct { background: var(--ok); border-color: var(--ok); color: var(--sheet); }
+.omr button.wrong { background: var(--pen); border-color: var(--pen); color: var(--sheet); }
+.omr button.cur { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); font-weight: 600; }
+.omr button.cur.correct, .omr button.cur.wrong { box-shadow: 0 0 0 2px var(--accent); }
+.legend { display: flex; gap: 12px; font-size: 0.75rem; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: 0; border: 1.5px solid var(--line); }
+.legend .lg { background: var(--ok); border-color: var(--ok); }
+.legend .lr { background: var(--pen); border-color: var(--pen); }
+.reset { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); }
+.linkbtn { background: none; border: none; padding: 0; color: var(--muted); text-decoration: underline; font-size: 0.8rem; }
+.linkbtn.danger { color: var(--pen); }
+
+/* 시험지 */
+.sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px 24px; display: grid; gap: 18px; min-width: 0; }
+@media (max-width: 560px) { .sheet { padding: 16px 14px 18px; } }
+.qhead { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+.qno { font-family: var(--font-display); font-size: 1.7rem; line-height: 1; white-space: nowrap; }
+.qno small { font-family: var(--font-body); font-size: 0.85rem; color: var(--muted); font-weight: 400; margin-left: 4px; font-variant-numeric: tabular-nums; }
+.qsrc { color: var(--muted); font-size: 0.88rem; min-width: 0; flex: 1 1 200px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); font-weight: 600; letter-spacing: 0.03em; }
+.tag.prev-correct { background: var(--ok-soft); color: var(--ok); }
+.tag.prev-wrong { background: var(--pen-soft); color: var(--pen); }
+.ask { margin: 0; font-size: 1.02rem; font-weight: 500; }
+.inputbox { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: 0.9rem; }
+.inputbox span { color: var(--muted); font-size: 0.8rem; }
+.inputbox code { font-family: var(--font-mono); background: var(--code-bg); border: 1px solid var(--line); padding: 2px 8px; border-radius: 5px; }
+
+.code { display: flex; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.86rem; line-height: 1.65; }
+.code pre { margin: 0; padding: 14px 16px 14px 12px; tab-size: 4; -moz-tab-size: 4; }
+.code .ln { color: var(--syn-com); text-align: right; user-select: none; padding-right: 10px; padding-left: 14px; border-right: 1px solid var(--line); position: sticky; left: 0; background: var(--code-bg); }
+.hljs-keyword, .hljs-meta, .hljs-built_in.hljs-keyword { color: var(--syn-kw); }
+.hljs-type, .hljs-built_in, .hljs-class .hljs-title, .hljs-title.class_ { color: var(--syn-type); }
+.hljs-string, .hljs-meta .hljs-string, .hljs-char { color: var(--syn-str); }
+.hljs-number, .hljs-literal { color: var(--syn-num); }
+.hljs-comment { color: var(--syn-com); font-style: italic; }
+.hljs-title.function_, .hljs-title { color: var(--syn-fn); }
+
+.answer { display: grid; gap: 8px; }
+.answer label { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.answer label kbd { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0; font-weight: 400; }
+textarea {
+  width: 100%; min-height: 96px; resize: vertical; font-family: var(--font-mono); font-size: 0.92rem; line-height: 1.6;
+  border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--sheet);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(1.6em - 1px), var(--line) calc(1.6em - 1px), var(--line) 1.6em);
+  background-position: 0 10px; background-attachment: local;
+}
+textarea:focus { border-color: var(--accent); outline: none; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn { border: 1.5px solid var(--line); background: var(--sheet); padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 0.92rem; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--sheet); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ok { border-color: var(--ok); color: var(--ok); }
+.btn.bad { border-color: var(--pen); color: var(--pen); }
+.spacer { flex: 1; }
+
+/* 채점 결과 */
+.result { border-top: 1px dashed var(--line); padding-top: 18px; display: grid; gap: 16px; }
+.verdict { display: flex; align-items: center; gap: 14px; }
+.mark { width: 64px; height: 64px; flex: none; }
+.mark path, .mark ellipse, .mark polygon { fill: none; stroke: var(--pen); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 260; stroke-dashoffset: 260; animation: draw 0.55s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .mark path, .mark ellipse, .mark polygon { animation: none; stroke-dashoffset: 0; } }
+.verdict h2 { margin: 0; font-family: var(--font-display); font-size: 1.3rem; line-height: 1.3; }
+.verdict p { margin: 2px 0 0; color: var(--muted); font-size: 0.88rem; }
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .compare { grid-template-columns: minmax(0, 1fr); } }
+.out { display: grid; gap: 6px; min-width: 0; }
+.out > span { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.out pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; white-space: pre; min-height: 44px; }
+.out.right pre { border-color: var(--ok); background: var(--ok-soft); }
+.out pre .sp { background: var(--warn-soft); border-bottom: 1px solid var(--warn); }
+.out .note { font-size: 0.8rem; color: var(--muted); }
+.expl { background: var(--accent-soft); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; }
+.expl b { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--accent); }
+.expl p { margin: 0; max-width: 68ch; }
+.selfgrade { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.88rem; color: var(--muted); }
+
+/* 이론·SQL 문제 */
+.qbody { white-space: pre-wrap; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; line-height: 1.8; overflow-wrap: anywhere; }
+.qbody.mono { font-family: var(--font-mono); font-size: 0.88rem; background: var(--code-bg); overflow-x: auto; overflow-wrap: normal; }
+.choices { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; border: 1px dashed var(--muted); border-radius: 8px; padding: 8px 12px; }
+.choices > b { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); }
+.choices ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.tables { display: flex; flex-wrap: wrap; gap: 14px; }
+.tbox { overflow-x: auto; max-width: 100%; }
+.tbox b { display: block; font-size: 0.82rem; margin-bottom: 4px; }
+.dtable { border-collapse: collapse; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+.dtable th, .dtable td { border: 1px solid var(--line); padding: 4px 12px; text-align: center; white-space: nowrap; }
+.dtable th { background: var(--code-bg); font-weight: 600; }
+.blanks { display: grid; gap: 8px; }
+.brow { display: flex; align-items: center; gap: 10px; }
+.brow b { flex: none; width: 1.8em; font-family: var(--font-display); font-size: 1.1rem; color: var(--muted); text-align: center; }
+.brow input {
+  flex: 1; min-width: 0; font-family: var(--font-mono); font-size: 0.95rem; border: none; border-bottom: 1.5px solid var(--line);
+  background: transparent; padding: 6px 2px;
+}
+.brow input:focus { outline: none; border-bottom-color: var(--accent); }
+.gtable { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.gtable th, .gtable td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+.gtable th { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.gtable td.no { font-family: var(--font-display); color: var(--muted); width: 2em; }
+.gtable td.mine { font-family: var(--font-mono); }
+.gtable td.ans { font-family: var(--font-mono); color: var(--ok); font-weight: 600; }
+.gtable td.ans small { display: block; font-family: var(--font-body); color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+.gtable td.v { width: 2em; text-align: center; font-weight: 700; }
+.gtable td.v.o { color: var(--ok); }
+.gtable td.v.x { color: var(--pen); }
+.tblwrap { overflow-x: auto; }
+.chips.small .chip { padding: 2px 0; min-width: 2.1em; text-align: center; }
+.chname { font-size: 0.78rem; color: var(--muted); min-height: 1.2em; }
+
+.nav { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 14px; }
+.empty { text-align: center; color: var(--muted); padding: 40px 10px; display: grid; gap: 10px; justify-items: center; }
+.empty h2 { font-family: var(--font-display); color: var(--ink); margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <aside class="side">
+    <div class="brand">
+      <a class="study-link" href="index.html#home">← 핵심이론 그림 정리</a>
+      <h1>정처기 실기 코드 문제풀이</h1>
+      <p id="brand-sub"></p>
+    </div>
+
+    <div class="panel">
+      <div class="stats">
+        <div class="stat"><b id="s-done">0</b><span>푼 문제</span></div>
+        <div class="stat ok"><b id="s-ok">0</b><span>정답</span></div>
+        <div class="stat bad"><b id="s-bad">0</b><span>오답</span></div>
+      </div>
+      <div class="bar" aria-hidden="true"><i class="g" id="bar-g"></i><i class="r" id="bar-r"></i></div>
+    </div>
+
+    <div class="panel">
+      <div class="fgroup"><span>단원</span><div class="chips small" data-filter="ch"></div><div class="chname" id="chname"></div></div>
+      <div class="fgroup"><span>유형</span><div class="chips" data-filter="lang"></div></div>
+      <div class="fgroup"><span>출처</span><div class="chips" data-filter="src"></div></div>
+      <div class="fgroup"><span>상태</span><div class="chips" data-filter="state"></div></div>
+    </div>
+
+    <div class="panel">
+      <details class="mapbox" id="mapbox" open>
+        <summary>문항 지도 <span id="map-count"></span></summary>
+        <div class="omr" id="omr"></div>
+        <div class="legend"><span><i></i>안 품</span><span><i class="lg"></i>정답</span><span><i class="lr"></i>오답</span></div>
+      </details>
+      <div class="reset" id="reset">
+        <button class="linkbtn" id="reset-ask" type="button">풀이 기록 초기화</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="sheet" id="sheet" aria-live="polite"></main>
+</div>
+
+<script type="application/json" id="data">[{"id":1,"title":"310 · 데이터 입출력 - C언어 예상체크1","lang":"C","input":"15#22","output":"13 34","expl":"%o는 8진수, %x는 16진수로 읽어서 %d(10진수)로 출력. 8진수 15 = 13, 16진수 22 = 34.","code":"#include \u003cstdio.h>\nmain() {\n\tint i, j;\n\tscanf(\"%o#%x\", &i, &j);\n\tprintf(\"%d %d\", i, j);\n}","file":"310 데이터 입출력 - C언어 예상체크1.c","src":"book","ch":10,"type":"code"},{"id":2,"title":"310 · 데이터 입출력 - C언어","lang":"C","input":"3 5","output":"8","expl":"공백으로 구분된 두 정수를 읽어 합을 출력. 입력 3 5 → 8.","code":"#include \u003cstdio.h>\nmain( )\n{\n\tint i, j, k;\n\tscanf(\"%d %d\", &i, &j);\n\tk = i + j;\n\tprintf(\"%d\\n\", k);\n}","file":"310 데이터 입출력 - C언어.c","src":"book","ch":10,"type":"code"},{"id":3,"title":"311 · 데이터 입출력 - Java 예상체크1","lang":"Java","input":"3 5","output":"8","expl":"Scanner.nextInt()로 정수 두 개를 읽고 printf(\"%d\")로 합 출력.","code":"import java.util.Scanner;\n\npublic class Test {\n\tpublic static void main(String args[ ]) {\n\t\tScanner scan = new Scanner(System.in); \n\t\tint a = scan.nextInt( ); \n\t\tint b = scan.nextInt( ); \n\t\tSystem.out.printf(\"%d\", a + b); \n\t\tscan.close( );\n\t}\n}","file":"311 데이터 입출력 - Java 예상체크1.java","src":"book","ch":10,"type":"code"},{"id":4,"title":"311 · 데이터 입출력 - Java","lang":"Java","input":"7","output":"a * 3 = 21\na / 2 = 3\na - 1 = 6","expl":"printf는 서식 출력, println은 줄바꿈 포함, print는 줄바꿈 없음. 정수/정수는 몫만 남음(7/2=3).","code":"import java.util.Scanner;\npublic class Test\n{\n\tpublic static void main(String[] args)\n\t{\n\t\tScanner scan = new Scanner(System.in);\n\t\tint a = scan.nextInt();\n\t\tSystem.out.printf(\"a * 3 = %d\\n\", a * 3);\n\t\tSystem.out.println(\"a / 2 = \" + (a / 2));\n\t\tSystem.out.print(\"a - 1 = \" + (a - 1));\n\t\tscan.close();\n\t}\n}","file":"311 데이터 입출력 - Java.java","src":"book","ch":10,"type":"code"},{"id":5,"title":"316 · 연산자 우선순위 기출체크1","lang":"C","input":"","output":"0","expl":"y%3=1, 1\u003c3 참 → z=2. 시프트가 &보다 먼저: z>>1=1, 2&1=0 → z=0. x>5 && 0\u003c=3 참 → z*x=0. 우선순위: 산술 > 시프트 > 비교 > & > && > ?:","code":"#include \u003cstdio.h>\nint main( ) {\n\tint x = 7, y = 4, z;\n\tz = y % 3 \u003c 3 ? 2 : 1;\n\tz = z & z >> 1;\n\tz = x > 5 && z \u003c= 3 ? z * x : z / x;\n\tprintf(\"%d\", z);\n\treturn 0;\n}","file":"316 연산자 우선순위 기출체크1.c","src":"book","ch":10,"type":"code"},{"id":6,"title":"317 · 제어문 - C언어 기출체크1","lang":"C","input":"","output":"-8","expl":"break가 없어서 case 3부터 아래로 전부 실행(fall-through). c=0 → +3=3 → -10=-7 → c-- = -8.","code":"#include \u003cstdio.h>\nmain( ) {\n\tint c = 1;\n\tswitch (3) {\n\tcase 1: c += 3;\n\tcase 2: c++;\n\tcase 3: c = 0;\n\tcase 4: c += 3;\n\tcase 5: c -= 10;\n\tdefault: c--;\n\t}\n\tprintf(\"%d\", c);\n}","file":"317 제어문 - C언어 기출체크1.c","src":"book","ch":10,"type":"code"},{"id":7,"title":"317 · 제어문 - C언어 기출체크2","lang":"C","input":"","output":"E","expl":"while이 끝나면 a는 문자열 길이 15(널 문자 위치). str[13] = 'E'.","code":"#include \u003cstdio.h>\nint main(void) {\n\tchar str[ ] = \"REPUBLICOFKOREA\";\n\tint a = 0;\n\twhile (str[a] != '\\0')\n\t\t++a;\n\tputchar(str[a-2]);\n\treturn 0;\n}","file":"317 제어문 - C언어 기출체크2.c","src":"book","ch":10,"type":"code"},{"id":8,"title":"317 · 제어문 - C언어","lang":"C","input":"","output":"1 is B Rank\n3 is A Rank\n4 is C Rank","expl":"score/10으로 등급 결정. 86→8→B, 53→5→F(출력 안 함), 95→9→A, 76→7→C, 61→F. F는 if에서 걸러짐.","code":"#include \u003cstdio.h>\nmain() {\n\tint score[] = { 86, 53, 95, 76, 61 };\n\tchar grade;\n\tchar str[] = \"Rank\";\n\tfor (int i = 0; i \u003c 5; i++) {\n\t\tswitch (score[i] / 10) {\n\t\tcase 10:\n\t\tcase 9:\n\t\t\tgrade = 'A';\n\t\t\tbreak;\n\t\tcase 8:\n\t\t\tgrade = 'B';\n\t\t\tbreak;\n\t\tcase 7:\n\t\t\tgrade = 'C';\n\t\t\tbreak;\n\t\tdefault: grade = 'F';\n\t\t}\n\t\tif (grade != 'F')\n\t\t\tprintf( \"%d is %c %s\\n\", i + 1, grade, str);\n\t}\n}","file":"317 제어문 - C언어.c","src":"book","ch":10,"type":"code"},{"id":9,"title":"318 · 제어문 - Java 기출체크1","lang":"Java","input":"","output":"0+1+2+3+4+5=15","expl":"매 반복 i를 출력하고, i==5일 때만 '='와 누적합 15, 그 외에는 '+'.","code":"public class Test {\n\tpublic static void main(String[] args) {\n\t\tint j, i;\n\t\tfor (j = 0, i = 0; i \u003c= 5; i++) {\n\t\t\tj += i;\n\t\t\tSystem.out.print(i);\n\t\t\tif (i == 5) {\n\t\t\t\tSystem.out.print(\"=\");\n\t\t\t\tSystem.out.print(j);\n\t\t\t}\n\t\t\telse\n\t\t\t\tSystem.out.print(\"+\");\n\t\t}\n\t}\n}","file":"318 제어문 - Java 기출체크1.java","src":"book","ch":10,"type":"code"},{"id":10,"title":"318 · 제어문 - Java 기출체크2","lang":"Java","input":"","output":"996","expl":"1~998 중 2와 3의 공배수(6의 배수)를 만날 때마다 r 갱신. 마지막 6의 배수는 996.","code":"public class Test {\n\tpublic static void main(String[] args) {\n\t\tint r = 0;\n\t\tfor (int i = 1; i \u003c 999; i++) {\n\t\t\tif (i % 3 == 0 && i % 2 == 0)\n\t\t\t\tr = i;\n\t\t}\n\t\tSystem.out.print(r);\n\t}\n}","file":"318 제어문 - Java 기출체크2.java","src":"book","ch":10,"type":"code"},{"id":11,"title":"318 · 제어문 - Java","lang":"Java","input":"","output":"e1 l2 i3 g4 a5 ","expl":"y에 'agile'을 저장하면 i=5. for-each마다 i--이므로 y[4]='e', y[3]='l', ... 역순 문자 뒤에 x의 값 1~5를 붙임.","code":"public class Test {\n\tpublic static void main(String[] args) {\n\t\tString str = \"agile\";\n\t\tint x[] = { 1, 2, 3, 4, 5 };\n\t\tchar y[] = new char[5];\n\t\tint i = 0;\n\t\twhile (i \u003c str.length()) {\n\t\t\ty[i] = str.charAt(i);\n\t\t\ti++;\n\t\t}\n\t\tfor (int p : x) {\n\t\t\ti--;\n\t\t\tSystem.out.print(y[i]);\n\t\t\tSystem.out.print(p + \" \");\n\t\t}\n\t}\n}","file":"318 제어문 - Java.java","src":"book","ch":10,"type":"code"},{"id":12,"title":"319 · break와 continue 기출체크1","lang":"Java","input":"","output":"30","expl":"a가 홀수면 continue로 건너뜀. 짝수 합 2+4+6+8+10 = 30.","code":"public class Test{\n\tpublic static void main(String[] args){\n\t\tint a = 0, sum = 0;\n\t\twhile (a \u003c 10) {\n\t\t\ta++;\n\t\t\tif (a % 2 == 1)\n\t\t\t\tcontinue;\n\t\t\tsum += a;\n\t\t}\n\t\tSystem.out.println(sum);\n\t}\n}","file":"319 break와 continue 기출체크1.java","src":"book","ch":10,"type":"code"},{"id":13,"title":"319 · break와 continue 기출체크2","lang":"C","input":"","output":"46","expl":"2진수 101110을 10진수로 변환. 1의 자리부터 0·1 + 1·2 + 1·4 + 1·8 + 0·16 + 1·32 = 46. (확장자는 .java지만 내용은 C 코드)","code":"#include \u003cstdio.h>\nmain() {\n\tint input = 101110;\n\tint di = 1;\n\tint sum = 0;\n\twhile (1) {\n\t\tif (input == 0) break;\n\t\tsum = sum + (input % 10) * di;\n\t\tdi = di * 2;\n\t\tinput = input / 10;\n\t}\n\tprintf(\"%d\", sum);\n}","file":"319 break와 continue 기출체크2.java","src":"book","ch":10,"type":"code"},{"id":14,"title":"320 · 포인터 - C언어 기출체크1","lang":"C","input":"","output":"8","expl":"*(ary+0)은 ary[0]. ary[0]=1, ary[1]=1+2=3, ary[2]=1+3=4. 합 8.","code":"#include \u003cstdio.h>\nint main() {\n\tint ary[3];\n\tint s = 0;\n\t*(ary + 0) = 1;\n\tary[1] = *(ary + 0) + 2;\n\tary[2] = *ary + 3;\n\tfor (int i = 0; i \u003c 3; i++)\n\t\ts = s + ary[i];\n\tprintf(\"%d\", s);\n}","file":"320 포인터 - C언어 기출체크1.c","src":"book","ch":10,"type":"code"},{"id":15,"title":"320 · 포인터 - C언어 기출체크2","lang":"C","input":"","output":"qwe","expl":"a의 각 문자가 b에 있으면 출력. q, w, e는 있고 r은 없음 → qwe.","code":"#include \u003cstdio.h>\nmain() {\n\tchar* a = \"qwer\";\n\tchar* b = \"qwtety\";\n\tfor (int i = 0; a[i] != '\\0'; i++)\n\t\tfor (int j = 0; b[j] != '\\0'; j++)\n\t\t\tif (a[i] == b[j])\n\t\t\t\tprintf(\"%c\", a[i]);\n}","file":"320 포인터 - C언어 기출체크2.c","src":"book","ch":10,"type":"code"},{"id":16,"title":"320 · 포인터 - C언어","lang":"C","input":"","output":"70, 70\ng, g, gilbut\nl, l, lbut\nu, u, ut","expl":"b=&a이므로 *b+20은 a를 70으로 바꿈. s[i]와 *(s+i)는 같은 문자, s+i는 i번째부터 끝까지의 문자열. i=0,2,4.","code":"#include \u003cstdio.h>\nmain() {\n\tint a = 50;\n\tint *b = &a;\n\t*b = *b + 20;\n\tprintf(\"%d, %d\\n\", a, *b);\n\tchar *s;\n\ts = \"gilbut\";\n\tfor (int i = 0; i \u003c 6; i += 2) {\n\t\tprintf(\"%c, \", s[i]);\n\t\tprintf(\"%c, \", *(s + i));\n\t\tprintf(\"%s\\n\", s + i);\n\t}\n}","file":"320 포인터 - C언어.c","src":"book","ch":10,"type":"code"},{"id":17,"title":"321 · 구조체 - C언어 기출체크1","lang":"C","input":"","output":"Lee\n38","expl":"p=a는 배열의 첫 주소. p++로 두 번째 구조체를 가리킴 → Lee, 38. 구조체 포인터는 -> 로 접근.","code":"#include \u003cstdio.h>\nmain( ) {\n\tstruct insa {\n\t\tchar name[10];\n\t\tint age;\n\t} a[ ] = { \"Kim\", 28, \"Lee\", 38, \"Park\", 42, \"Choi\", 31 };\n\tstruct insa* p;\n\tp = a;\n\tp++;\n\tprintf(\"%s\\n\", p->name);\n\tprintf(\"%d\\n\", p->age);\n}","file":"321 구조체 - C언어 기출체크1.c","src":"book","ch":10,"type":"code"},{"id":18,"title":"321 · 구조체 - C언어 기출체크2","lang":"C","input":"","output":"2","expl":"st[0].n=0, st[1].g=1+1=2 → 0+2 = 2.","code":"#include \u003cstdio.h>\nstruct A {\n\tint n;\n\tint g;\n};\nmain( ) {\n\tstruct A st[2];\n\tfor (int i = 0; i \u003c 2; i++) {\n\t\tst[i].n = i;\n\t\tst[i].g = i + 1;\n\t}\n\tprintf(\"%d\", st[0].n + st[1].g);\n}","file":"321 구조체 - C언어 기출체크2.c","src":"book","ch":10,"type":"code"},{"id":19,"title":"321 · 구조체 - C언어","lang":"C","input":"","output":"501","expl":"(p+1)->hab = 84 + 75 = 159. (p+1)->hhab = 159 + 95 + 88 = 342. 159+342 = 501. 포인터 +1은 구조체 하나 크기만큼 이동.","code":"#include \u003cstdio.h>\nstruct jsu {\n\tchar nae[12];\n\tint os, db, hab, hhab;\n};\nint main() {\n\tstruct jsu st[3] = { {\"데이터1\", 95, 88}, {\"데이터2\", 84, 91},\n\t\t\t\t\t\t{\"데이터3\", 86, 75} };\n\tstruct jsu* p;\n\tp = &st[0];\n\t(p + 1)->hab = (p + 1)->os + (p + 2)->db;\n\t(p + 1)->hhab = (p + 1)->hab + p->os + p->db;\n\tprintf(\"%d\", (p + 1)->hab + (p + 1)->hhab);\n}","file":"321 구조체 - C언어.c","src":"book","ch":10,"type":"code"},{"id":20,"title":"322 · 사용자 정의 함수 - C언어 기출체크1","lang":"C","input":"","output":"50 75 85 95 100","expl":"버블 정렬. 빈칸 문제로 나오면 a[j] > a[j+1] 이면 swap(a, j, j+1). 정렬 결과는 50 75 85 95 100 (출력문은 없음).","code":"#include \u003cstdio.h>\nvoid swap(int* a, int idx1, int idx2) {\n\tint t = a[idx1];\n\ta[idx1] = a[idx2];\n\ta[idx2] = t;\n}\n\nvoid Usort(int* a, int len) {\n\tfor (int i = 0; i \u003c len - 1; i++)\n\t\tfor (int j = 0; j \u003c len - 1 - i; j++)\n\t\t\tif (a[j] > a[j + 1])\n\t\t\t\tswap(a, j, j + 1);\n}\n\nmain() {\n\tint a[] = { 85, 75, 50, 100, 95 };\n\tint nx = 5;\n\tUsort(a, nx);\n}","file":"322 사용자 정의 함수 - C언어 기출체크1.c","src":"book","ask":"출력문은 없습니다. 실행이 끝난 뒤 배열 a의 원소를 앞에서부터 공백으로 구분해 쓰시오.","ch":10,"type":"code"},{"id":21,"title":"322 · 사용자 정의 함수 - C언어 기출체크2","lang":"C","input":"5","output":"120","expl":"재귀 팩토리얼. 입력 5 → 5! = 120.","code":"#include \u003cstdio.h>\nint func(int a) {\n\tif (a \u003c= 1) return 1;\n\treturn a * func(a - 1);\n}\n\nint main() {\n\tint a;\n\tscanf(\"%d\", &a);\n\tprintf(\"%d\", func(a));\n}","file":"322 사용자 정의 함수 - C언어 기출체크2.c","src":"book","ch":10,"type":"code"},{"id":22,"title":"322 · 사용자 정의 함수 - C언어","lang":"C","input":"","output":"6","expl":"함수 포인터 int (*pf)(int)에 factorial을 대입하고 pf(3) 호출 → 3! = 6.","code":"#include \u003cstdio.h>\nint factorial(int n);\nmain() {\n\tint (*pf)(int);\n\tpf = factorial;\n\tprintf(\"%d\", pf(3));\n}\nint factorial(int n) {\n\tif (n \u003c= 1)\n\t\treturn 1;\n\telse\n\t\treturn n * factorial(n - 1);\n}","file":"322 사용자 정의 함수 - C언어.c","src":"book","ch":10,"type":"code"},{"id":23,"title":"323 · Java의 클래스1 기출체크1","lang":"Java","input":"","output":"2000","expl":"객체는 참조로 전달되므로 func 안의 변경이 그대로 반영. a=100 → func1에서 1000 → b=1000 → func2에서 a=2000.","code":"class A {\n\tint a;\n\tint b;\n}\npublic class Test {\n\tstatic void func1(A m) {\n\t\tm.a *= 10;\n\t}\n\tstatic void func2(A m) {\n\t\tm.a += m.b;\n\t}\n\tpublic static void main(String args[]) {\n\t\tA m = new A();\n\t\tm.a = 100;\n\t\tfunc1(m);\n\t\tm.b = m.a;\n\t\tfunc2(m);\n\t\tSystem.out.printf(\"%d\", m.a);\n\t}\n}","file":"323 Java의 클래스1 기출체크1.java","src":"book","ch":10,"type":"code"},{"id":24,"title":"323 · Java의 클래스1 기출체크2","lang":"Java","input":"","output":"10\n11\n10\n20","expl":"static b는 클래스 전체가 공유. Static.b=10 → 후위증가 출력 10 → st.b는 11 → 지역변수 a=10 → st.a=20.","code":"class Static {\n\tpublic int a = 20;\n\tstatic int b = 0;\n}\n\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tint a = 10;\n\t\tStatic.b = a;\n\t\tStatic st = new Static();\n\t\tSystem.out.println(Static.b++);\n\t\tSystem.out.println(st.b);\n\t\tSystem.out.println(a);\n\t\tSystem.out.print(st.a);\n\t}\n}","file":"323 Java의 클래스1 기출체크2.java","src":"book","ch":10,"type":"code"},{"id":25,"title":"323 · Java의 클래스1","lang":"Java","input":"","output":"19","expl":"funcAdd(3,6) = 3 + 6 + 멤버변수 a(10) = 19.","code":"class ClassA {\n\tint a = 10;\n\tint funcAdd(int x, int y) {\n\t\treturn x + y + a;\n\t}\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tint x = 3, y = 6, r;\n\t\tClassA cal = new ClassA();\n\t\t\tr = cal.funcAdd(x, y);\n\t\tSystem.out.print(r);\n\t}\n}","file":"323 Java의 클래스1.java","src":"book","ch":10,"type":"code"},{"id":26,"title":"324 · Java의 클래스2 기출체크1","lang":"Java","input":"","output":"a=10","expl":"new B(10) → super(a)로 A의 생성자 호출(a=10) → super.display()가 'a=10' 출력.","code":"class A {\n\tint a;\n\tpublic A(int a) { this.a = a; }\n\tvoid display() { System.out.println(\"a=\" + a); }\n}\nclass B extends A {\n\tpublic B(int a) {\n\t\tsuper(a);\n\t\tsuper.display();\n\t}\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tB obj = new B(10);\n\t}\n}","file":"324 Java의 클래스2 기출체크1.java","src":"book","ch":10,"type":"code"},{"id":27,"title":"324 · Java의 클래스2","lang":"Java","input":"","output":"5P","expl":"x()는 오버라이딩 → 실제 객체 Child의 i+3 = 5. static 메소드 id()는 오버라이딩되지 않고 참조 타입 Parent 기준 → 'P'. 결과 5P.","code":"public class Main {\n\tpublic static class Parent {\n\t\tpublic int x(int i) { return i + 2; }\n\t\tpublic static String id( ) { return \"P\"; }\n\t}\n\tpublic static class Child extends Parent {\n\t\tpublic int x(int i) { return i + 3; }\n\t\tpublic String x(String s) { return s + \"R\"; }\n\t\tpublic static String id( ) { return \"C\"; }\n\t}\n\tpublic static void main(String[] args) {\n\t\tParent ref = new Child( );\n\t\tSystem.out.println(ref.x(2) + ref.id( ));\n\t}\n}","file":"324 Java의 클래스2.java","src":"book","ch":10,"type":"code"},{"id":28,"title":"326 · Java의 활용 기출체크1","lang":"Java","input":"","output":"Vehicle name : Spark","expl":"obj.getName()은 인자가 없는 버전 → Vehicle의 getName(). 생성자에서 super.name='Spark'로 설정 → 'Vehicle name : Spark'.","code":"abstract class Vehicle {\n\tString name;\n\tabstract public String getName(String val);\n\tpublic String getName() {\n\t\treturn \"Vehicle name : \" + name;\n\t}\n}\nclass Car extends Vehicle {\n\tprivate String name;\n\tpublic Car(String val) {\n\t\tname = super.name = val;\n\t}\n\tpublic String getName(String val) {\n\t\treturn \"Car name : \" + val;\n\t}\n\tpublic String getName(byte[] val) {\n\t\treturn \"Car name : \" + val;\n\t}\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tVehicle obj = new Car(\"Spark\");\n\t\tSystem.out.print(obj.getName());\n\t}\n}","file":"326 Java의 활용 기출체크1.java","src":"book","ch":10,"type":"code"},{"id":29,"title":"326 · Java의 활용","lang":"Java","input":"","output":"Chicken is animal\nZoo","expl":"new Chicken() 생성자에서 look() 호출 → 'Chicken is animal'. 이어서 a.show() → 'Zoo'.","code":"abstract class Animal {\n\tString a = \" is animal\";\n\tabstract void look();\n\tvoid show() {\n\t\tSystem.out.println(\"Zoo\");\n\t}\n}\nclass Chicken extends Animal {\n\tChicken() {\n\t\tlook();\n\t}\n\tvoid look() {\n\t\tSystem.out.println(\"Chicken\" + a);\n\t}\n\tvoid display() {\n\t\tSystem.out.println(\"two wings\");\n\t}\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tAnimal a = new Chicken();\n\t\ta.show();\n\t}\n}","file":"326 Java의 활용.java","src":"book","ch":10,"type":"code"},{"id":30,"title":"327 · Python의 활용1 기출체크1","lang":"Python","input":"","output":"Seynaau","expl":"각 도시 이름의 두 번째 글자 i[1]을 이어붙임: e, y, n, a, a, u → Seynaau.","code":"a = [ 'Seoul', 'Kyeonggi', 'Incheon', 'Daejeon', 'Daegu', 'Pusan'];\nstr01 = 'S'\nfor i in a:\n\tstr01 = str01 + i[1]\nprint(str01)","file":"327 Python의 활용1 기출체크1.py","src":"book","ch":10,"type":"code"},{"id":31,"title":"327 · Python의 활용1","lang":"Python","input":"abc123-xyz789","output":"789,abc\n3 4 5","expl":"입력을 '-'로 나눠 x, y를 리스트 끝에 추가하고 'def456' 삭제 → ['abc123','ghi789',x,y]. a[1][-3:]='789', a[2][:-3]은 x의 뒤 3글자를 뺀 부분. sep=','로 구분. range(3,6) → 3 4 5.","code":"x, y = input('입력 :').split('-')\na = [ 'abc123', 'def456', 'ghi789' ]\na.append(x)\na.append(y)\na.remove('def456')\nprint(a[1][-3:], a[2][:-3], sep = ',')\nfor i in range(3, 6):\n\tprint(i, end = ' ')","file":"327 Python의 활용1.py","src":"book","console":"입력 :789,abc\n3 4 5 ","ch":10,"type":"code"},{"id":32,"title":"328 · Python의 활용2 기출체크1","lang":"Python","input":"","output":"{'태국', '홍콩', '베트남', '중국', '한국'}","expl":"세트: add는 추가(중복 무시), remove는 삭제, update는 여러 개 추가. 최종 {'한국','중국','베트남','홍콩','태국'}. 세트는 순서가 없으므로 어떤 순서로 나와도 정답.","code":"asia = {'한국', '중국', '일본'}\nasia.add('베트남')\nasia.add('중국')\nasia.remove('일본')\nasia.update({'한국', '홍콩', '태국'})\nprint(asia)","file":"328 Python의 활용2 기출체크1.py","src":"book","unordered":true,"ch":10,"type":"code"},{"id":33,"title":"328 · Python의 활용2 기출체크2","lang":"Python","input":"","output":"REMEMBER AND STR","expl":"a[0:3]='REM', a[12:16]='EMBE' → b='REMEMBE'. c='R AND STR'. 이어 붙이면 REMEMBER AND STR.","code":"a = \"REMEMBER NOVEMBER\"\nb = a[0:3] + a[12:16]\nc = \"R AND %s\" % \"STR\"\nprint(b + c)","file":"328 Python의 활용2 기출체크2.py","src":"book","ch":10,"type":"code"},{"id":34,"title":"328 · Python의 활용2","lang":"Python","input":"","output":"과일명 : apple\n과일명 : kiwi\n과일명 : banana","expl":"update로 kiwi 추가(banana는 중복), lemon 삭제, apple은 중복이라 무시 → apple, banana, kiwi (세트라 순서 무관).","code":"a = {'apple', 'lemon', 'banana'}\na.update( {'kiwi', 'banana'} )\na.remove('lemon')\na.add('apple')\nfor i in a:\n\tprint(\"과일명 : %s\" % i)","file":"328 Python의 활용2.py","src":"book","unordered":true,"ch":10,"type":"code"},{"id":35,"title":"329 · 람다 식 기출체크1","lang":"Python","input":"","output":"[101, 102, 103, 104, 105]","expl":"map + lambda로 각 원소에 100을 더해 리스트로 변환.","code":"a = [1, 2, 3, 4, 5]\na = list(map(lambda num : num + 100, a))\nprint(a)","file":"329 람다 식 기출체크1.py","src":"book","ch":10,"type":"code"},{"id":36,"title":"330 · Python의 클래스 기출체크1","lang":"Python","input":"","output":"6","expl":"self 자리에 sel이라는 이름을 썼을 뿐(첫 매개변수 이름은 자유). setdata(4,2) 후 add() → 6.","code":"class FourCal:\n\tdef setdata(sel, fir, sec):\n\t\tsel.fir = fir\n\t\tsel.sec = sec\n\tdef add(sel):\n\t\tresult = sel.fir + sel.sec\n\t\treturn result\na = FourCal( )\na.setdata(4, 2)\nprint(a.add( ))","file":"330 Python의 클래스 기출체크1.py","src":"book","ch":10,"type":"code"},{"id":37,"title":"330 · Python의 클래스","lang":"Python","input":"","output":"10 20\n20 10","expl":"클래스 변수 x,y = 10,20. chg()가 인스턴스 속성 x,y를 서로 교환 → 두 번째 줄은 20 10.","code":"class Cls: \n\tx, y = 10, 20 \n\tdef chg(self):\n\t\ttemp = self.x\n\t\tself.x = self.y\n\t\tself.y = temp\na = Cls( )\nprint(a.x, a.y)\na.chg( )\nprint(a.x, a.y)","file":"330 Python의 클래스.py","src":"book","ch":10,"type":"code"},{"id":38,"title":"331 · Python의 클래스 없는 메소드 사용 기출체크1","lang":"Python","input":"","output":"a = 20 b = 2","expl":"기본값 매개변수. num2를 안 넘기면 2 → a = 20 b = 2.","code":"def func(num1, num2 = 2):\n\tprint('a =', num1, 'b =', num2)\nfunc(20)","file":"331 Python의 클래스 없는 메소드 사용 기출체크1.py","src":"book","ch":10,"type":"code"},{"id":39,"title":"331 · Python의 클래스 없는 메소드 사용","lang":"Python","input":"","output":"9 4.0\n9 12","expl":"함수 안에서 x=9, y=4.0 (/는 항상 실수 나눗셈). 반환값 9가 a에 저장되고 b는 그대로 12.","code":"def calc(x, y):\n\tx *= 3\n\ty /= 3\n\tprint(x, y)\n\treturn x\n\na, b = 3, 12\na = calc(a, b)\nprint(a, b)","file":"331 Python의 클래스 없는 메소드 사용.py","src":"book","ch":10,"type":"code"},{"id":40,"title":"332 · Python - Range 기출체크1","lang":"Python","input":"","output":"26","expl":"result는 매번 a를 기준으로 다시 계산. i=1: 100>>1=50, +1=51. i=2: 100>>2=25, +1=26. 마지막 값 26.","code":"a = 100\nresult = 0\nfor i in range(1,3):\n\tresult = a >> i\n\tresult = result + 1\nprint(result)","file":"332 Python - Range 기출체크1.py","src":"book","ch":10,"type":"code"},{"id":41,"title":"333 · Python - 슬라이스 기출체크1","lang":"Python","input":"Hello World","output":"Helrld","expl":"앞 3글자 + 뒤 3글자. 'Hello World' → 'Hel' + 'rld' = Helrld.","code":"String = input(\"7문자 이상 문자열을 입력하시오 :\")\nm = String[0:3]+String[-3:]\nprint(m)","file":"333 Python - 슬라이스 기출체크1.py","src":"book","console":"7문자 이상 문자열을 입력하시오 :Helrld","ch":10,"type":"code"},{"id":42,"title":"335 · Python - 세트, 딕셔너리 관련 주요 메소드 기출체크1","lang":"Python","input":"","output":"2","expl":"dst={1:2, 2:4, 3:6}, s={2,4,6}. lst 변경은 dst에 영향 없음. dst[2]=7 → values는 {2,7,6}. s에 99 추가 → {2,4,6,99}. 교집합 {2,6} → 길이 2.","code":"lst = [1,2,3]\ndst = {i : i* 2 for i in lst}\ns = set(dst.values( ))\nlst[0] = 99\ndst[2] = 7\ns.add(99)\nprint(len(s & set(dst.values( ))))","file":"335 Python - 세트, 딕셔너리 관련 주요 메소드 기출체크1.py","src":"book","ch":10,"type":"code"},{"id":43,"title":"예상문제 01","lang":"Python","input":"","output":"False","expl":"100 == 200 은 거짓 → False (파이썬은 첫 글자 대문자).","code":"x, y = 100, 200\nprint(x==y)","file":"예상문제은행/문제 01.py","src":"bank","ch":10,"type":"code"},{"id":44,"title":"예상문제 02","lang":"Java","input":"","output":"child","expl":"오버라이딩. 참조 타입이 Parent여도 실제 객체는 Child이므로 Child의 show() 실행 → child.","code":"class Parent { \n\tvoid show( ) { System.out.println(\"parent\"); }\n}\nclass Child extends Parent { \n\tvoid show( ) {  System.out.println(\"child\"); }\n}\npublic class Test {\n\tpublic static void main(String[ ] args) {\n\t\tParent pa = new Child( );\n\t\tpa.show( );\n\t}\n}","file":"예상문제은행/문제 02.java","src":"bank","ch":10,"type":"code"},{"id":45,"title":"예상문제 03","lang":"Python","input":"","output":"[1, 2, 3]\n7\n1 2 3 \n4 5 \n6 7 8 9 ","expl":"lol[0]은 첫 번째 리스트 [1, 2, 3], lol[2][1]은 7. 이중 for로 행마다 원소를 공백으로 출력하고 print()로 줄바꿈.","code":"lol = [[1, 2, 3], [4, 5], [6, 7, 8, 9]]\nprint(lol[0])\nprint(lol[2][1])\nfor sub in lol:\n\tfor item in sub:\n\t\tprint(item, end=' ')\n\tprint()","file":"예상문제은행/문제 03.py","src":"bank","ch":10,"type":"code"},{"id":46,"title":"예상문제 04","lang":"Java","input":"","output":"1","expl":"실제 객체 Child의 compute 실행. num\u003c=1이면 num 자체를 반환(음수도 그대로!). c(2)=c(1)+c(-1)=1+(-1)=0, c(3)=c(2)+c(0)=0, c(4)=c(3)+c(1)=0+1 = 1.","code":"class Parent {\n\tint compute(int num) {\n\t\tif(num \u003c= 1) return num;\n\t\treturn compute(num - 1) + compute(num - 2);\n\t}\n}\nclass Child extends Parent {\n\tint compute(int num) {\n\t\tif(num \u003c= 1) return num;\n\t\treturn compute(num - 1) + compute(num - 3);\n\t}\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tParent obj = new Child();\n\t\tSystem.out.print(obj.compute(4));\n\t}\n}","file":"예상문제은행/문제 04.java","src":"bank","ch":10,"type":"code"},{"id":47,"title":"예상문제 05","lang":"C","input":"","output":"13","expl":"set: arr[((i+1)/3)%3][(i+1)%3] = data[i] → 결과 행렬 [[9,5,2],[7,4,1],[8,3,6]]. 짝수 인덱스는 +, 홀수는 -: 9-5+2-7+4-1+8-3+6 = 13.","code":"#include \u003cstdio.h>\n#include \u003cstdlib.h>\nvoid set(int** arr, int* data, int rows, int cols) { \n    for (int i = 0; i \u003c rows * cols; ++i) { \n        arr[((i + 1) / rows) % rows][(i + 1) % cols] = data[i]; \n    }\n    \n}\nint main( ) { \n    int rows = 3, cols = 3, sum = 0; \n    int data[] = {5, 2, 7, 4, 1, 8, 3, 6, 9}; \n    int** arr; arr = (int**) malloc(sizeof(int*) * rows); \n    for (int i = 0; i \u003c cols; i++) { \n        arr[i] = (int*) malloc(sizeof(int) * cols); \n    } \n    set(arr, data, rows, cols); \n    for (int i = 0; i \u003c rows * cols; i++) { \n        sum += arr[i / rows][i % cols] * (i % 2 == 0 ? 1 : -1); \n    } \n    for(int i = 0; i \u003c rows; i++) { \n        free(arr[i]); \n    } \n    free(arr); \n    printf(\"%d\", sum);\n}","file":"예상문제은행/문제 05.c","src":"bank","ch":10,"type":"code"},{"id":48,"title":"예상문제 06","lang":"C","input":"","output":"35421","expl":"insert는 항상 맨 앞에 삽입 → 5 4 3 2 1. reconnect(3)은 값 3인 노드를 떼어 맨 앞으로 옮김 → 3 5 4 2 1 → 35421.","code":"#include \u003cstdio.h> \n#include \u003cstdlib.h> \ntypedef struct Data { \n    int value; struct Data *next;\n} Data;\n\nData* insert(Data* head, int value) { \n    Data* new_node = (Data*)malloc(sizeof(Data)); \n    new_node -> value = value; new_node -> next = head; return new_node;\n}\n\nData* reconnect(Data* head, int value) { \n    if (head == NULL || head -> value == value) return head; \n    Data *prev = NULL, *curr = head; \n    while (curr != NULL && curr -> value != value) { \n        prev = curr; curr = curr -> next; \n    } \n    if (curr != NULL && prev != NULL) { \n        prev -> next = curr -> next; curr -> next = head; head = curr; \n    } \n    return head;\n}\n\nint main( ) { \n        Data *head = NULL, *curr; \n        for (int i = 1; i \u003c= 5; i++) \n            head = insert(head, i); \n        head = reconnect(head, 3);\n        for (curr = head; curr != NULL; curr = curr -> next) \n            printf(\"%d\", curr->value); \n        return 0; \n}","file":"예상문제은행/문제 06.c","src":"bank","ch":10,"type":"code"},{"id":49,"title":"예상문제 07","lang":"Java","input":"","output":"positive","expl":"static 메소드 check(1): 1 >= 0 참 → positive.","code":"public class Test {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.print(Test.check(1));\n\t}\n\tstatic String check(int num){\n\t\treturn (num >= 0) ? \"positive\" : \"negative\";\n\t}\n}","file":"예상문제은행/문제 07.java","src":"bank","ch":10,"type":"code"},{"id":50,"title":"예상문제 08","lang":"C","input":"","output":"151","expl":"v1>v2 거짓이므로 삼항식 값은 v1=0 → if(0) 거짓 → else: v3=29\u003c\u003c2=116. v2+v3 = 35+116 = 151.","code":"#include \u003cstdio.h>\n#include \u003cstdlib.h>\n\nmain(int argc, char *argv[]) {\n\tint v1 = 0;\n\tint v2 = 35;\n\tint v3 = 29;\n\tif (v1 > v2 ? v2 : v1)\n\t\tv2 = v2 \u003c\u003c 2;\n\telse\n\t\tv3 = v3 \u003c\u003c 2;\n\tprintf(\"%d\", v2 + v3);\n\treturn 0;\n}","file":"예상문제은행/문제 08.c","src":"bank","ch":10,"type":"code"},{"id":51,"title":"예상문제 09","lang":"C","input":"","output":"1000원의 개수 : 4\n500원의 개수 : 1\n100원의 개수 : 1\n10원의 개수 : 2","expl":"4620원을 1000, 500, 100, 10원으로 분해. 4개, 1개, 1개, 2개. % 로 나머지를 구한 뒤 / 로 개수.","code":"#include \u003cstdio.h>\n\nmain() {\n\tint m = 4620;\n\tint a = m / 1000;\n\tint b = m % 1000 / 500;\n\tint c = m % 500 / 100;\n\tint d = m % 100 / 10;\n\tprintf(\"1000원의 개수 : %d\\n\", a);\n\tprintf(\"500원의 개수 : %d\\n\", b);\n\tprintf(\"100원의 개수 : %d\\n\", c);\n\tprintf(\"10원의 개수 : %d\\n\", d);\n}","file":"예상문제은행/문제 09.c","src":"bank","ch":10,"type":"code"},{"id":52,"title":"예상문제 10","lang":"C","input":"","output":"변환된 문자열 : Nd sc 1","expl":"대문자 I: (8+5)%25=13 → 'N'. 소문자는 +10: t→d, i→s, s→c. 숫자는 +3: 8→(8+3)%10=1. 공백은 그대로 → 'Nd sc 1'.","code":"#include \u003cstdio.h>\n#include \u003cctype.h>\n\nint main( ) {\n\tchar *p = \"It is 8\";\n\tchar result[100];\n\tint i;\n\tfor(i = 0; p[i] != '\\0'; i++) {\n\t\tif(isupper(p[i]))\n\t\t\tresult[i] = (p[i] - 'A'+ 5) % 25 + 'A';\n\t\telse if(islower(p[i]))\n\t\t\tresult[i] = (p[i] - 'a'+ 10) % 26 + 'a';\n\t\telse if(isdigit(p[i]))\n\t\t\tresult[i] = (p[i] - '0'+ 3) % 10 + '0';\n\t\telse if(!(isupper(p[i]) || islower(p[i]) || isdigit(p[i])))\n\t\t\tresult[i] = p[i];\n\t}\n\tresult[i] = '\\0';\n\tprintf(\"변환된 문자열 : %s\\n\", result);\n\treturn 0;\n}","file":"예상문제은행/문제 10.c","src":"bank","ch":10,"type":"code"},{"id":53,"title":"예상문제 11","lang":"C","input":"","output":"43215","expl":"n[(i+1)%5]: 인덱스 1,2,3,4,0 순서로 출력 → 4 3 2 1 5 → 43215.","code":"#include \u003cstdio.h>\nmain() {\n\tint n[] = { 5, 4, 3, 2, 1 };\n\tfor (int i = 0; i \u003c 5; i++)\n\t\tprintf(\"%d\", n[(i+1)%5]);\n}","file":"예상문제은행/문제 11.c","src":"bank","ch":10,"type":"code"},{"id":54,"title":"예상문제 12","lang":"C","input":"","output":"BCD","expl":"sum=250, 250/30=8 → case 8부터 break 없이 아래로 전부 실행(fall-through): B C D.","code":"#include \u003cstdio.h>\nmain() {\n\tint n[] = { 73, 95, 82 };\n\tint sum = 0;\n\tfor (int i = 0; i \u003c 3; i++)\n\t\tsum += n[i];\n\tswitch (sum / 30) {\n\t\tcase 10:\n\t\tcase 9: printf(\"A\");\n\t\tcase 8: printf(\"B\");\n\t\tcase 7:\n\t\tcase 6: printf(\"C\");\n\t\tdefault: printf(\"D\");\n\t}\n}","file":"예상문제은행/문제 12.c","src":"bank","ch":10,"type":"code"},{"id":55,"title":"예상문제 13","lang":"C","input":"","output":"11 12 22 25 64 ","expl":"이중 do~while로 앞에서부터 더 작은 값과 교환(선택 정렬 방식) → 오름차순 11 12 22 25 64. 끝에 공백 하나씩.","code":"#include \u003cstdio.h>\nmain() {\n\tint E[] = { 64, 25, 12, 22, 11 };\n\tint n = sizeof(E) / sizeof(E[0]);\n\tint i = 0;\n\tdo {\n\t\tint j = i + 1;\n\t\tdo {\n\t\t\tif (E[i] > E[j]) {\n\t\t\tint tmp = E[i];\n\t\t\tE[i] = E[j];\n\t\t\tE[j] = tmp;\n\t\t\t}\n\t\t\tj++;\n\t\t} while (j \u003c n);\n\t\ti++;\n\t} while (i \u003c n - 1);\n\tfor (int i = 0; i \u003c= 4; i++)\n\t\tprintf(\"%d \", E[i]);\n}","file":"예상문제은행/문제 13.c","src":"bank","ch":10,"type":"code"},{"id":56,"title":"예상문제 14","lang":"C","input":"","output":"505","expl":"1~2023 중 4의 배수 개수 = 2023 / 4 = 505.","code":"#include \u003cstdio.h>\nmain() {\n\tint c = 0;\n\tfor (int i = 1; i \u003c= 2023; i++)\n\t\tif (i % 4 == 0)\n\t\t\tc++;\n\tprintf(\"%d\", c);\n}","file":"예상문제은행/문제 14.c","src":"bank","ch":10,"type":"code"},{"id":57,"title":"예상문제 15","lang":"C","input":"","output":"1. KOREA\n2. OREA\n3. K\n4. E\n5. O","expl":"p는 'KOREA', p+1은 'OREA', *p='K', *(p+3)='E', *p+4는 'K'의 문자 코드+4 = 'O'.","code":"#include \u003cstdio.h>\nmain() {\n\tchar* p = \"KOREA\";\n\tprintf(\"1. %s\\n\", p);\n\tprintf(\"2. %s\\n\", p + 1);\n\tprintf(\"3. %c\\n\", *p);\n\tprintf(\"4. %c\\n\", *(p + 3));\n\tprintf(\"5. %c\\n\", *p + 4);\n}","file":"예상문제은행/문제 15.c","src":"bank","ch":10,"type":"code"},{"id":58,"title":"예상문제 16","lang":"C","input":"","output":"C","expl":"p=&test[1] → i=2, g=\"DC\". g+(2-1)=g+1 → \"C\"부터 출력 → C.","code":"#include \u003cstdio.h>\nstruct Test { \n    int i;\n    const char *g;\n};\n\nint main( ) { \n    struct Test test[ ] = {{1, \"AB\"}, {2, \"DC\"}, {3, \"EB\"}}; \n    struct Test *p = &test[1]; \n    printf(\"%s\", p->g + (p->i - 1)); \n    return 0;\n}","file":"예상문제은행/문제 16.c","src":"bank","ch":10,"type":"code"},{"id":59,"title":"예상문제 17","lang":"C","input":"","output":"GECA","expl":"inverse로 뒤집으면 HGFEDCBA. 홀수 인덱스 1,3,5,7만 출력 → G E C A.","code":"#include \u003cstdio.h>\n#include \u003cstring.h>\n\nvoid inverse(char *str, int len) {\n\tfor(int i = 0, j = len - 1; i \u003c j; i++, j--) {\n\t\tchar ch = str[i];\n\t\tstr[i] = str[j];\n\t\tstr[j] = ch;\n\t}\n}\n\nint main() {\n\tchar str[100] = \"ABCDEFGH\";\n\tint len = strlen(str);\n\tinverse(str, len);\n\tfor(int i = 1; i \u003c len; i += 2) {\n\t\tprintf(\"%c\", str[i]);\n\t}\n\treturn 0;\n}","file":"예상문제은행/문제 17.c","src":"bank","ch":10,"type":"code"},{"id":60,"title":"예상문제 18","lang":"C","input":"Kim ⏎ Lee ⏎ Park","output":"Park\nPark\nPark","expl":"n은 전역 배열 하나뿐. 세 번 모두 같은 주소를 반환하므로 마지막 입력(Park)이 세 번 출력됨.","code":"#include \u003cstdio.h>\nchar n[30];\nchar* getname() {\n\tprintf(\"이름 입력 : \");\n\tgets(n);\n\treturn n;\n}\n\nmain() {\n\tchar* n1 = getname();\n\tchar* n2 = getname();\n\tchar* n3 = getname();\n\tprintf(\"%s\\n\", n1);\n\tprintf(\"%s\\n\", n2);\n\tprintf(\"%s\\n\", n3);\n}","file":"예상문제은행/문제 18.c","src":"bank","console":"이름 입력 : 이름 입력 : 이름 입력 : Park\nPark\nPark","ch":10,"type":"code"},{"id":61,"title":"예상문제 19","lang":"C","input":"","output":"34","expl":"완전수(자기 자신을 뺀 약수의 합이 자신과 같은 수): 1~100에서 6과 28. 합 34.","code":"#include \u003cstdio.h>\nint isPerfectNum(int num) {\n\tint sum = 0;\n\tfor (int i = 1; i \u003c num; i++) {\n\t\tif (num % i == 0)\n\t\t\tsum += i;\n\t}\n\tif (num == sum) return 1;\n\telse return 0;\n}\n\nmain() {\n\tint r = 0;\n\tfor (int i = 1; i \u003c= 100; i++)\n\t\tif (isPerfectNum(i))\n\t\t\tr += i;\n\tprintf(\"%d\", r);\n}","file":"예상문제은행/문제 19.c","src":"bank","ch":10,"type":"code"},{"id":62,"title":"예상문제 20","lang":"Java","input":"","output":"true\nfalse\ntrue\ntrue","expl":"문자열 리터럴은 문자열 풀에서 공유 → str1==str2 true. new String은 새 객체 → str1==str3 false. equals는 내용 비교 → true, true.","code":"public class Test {\n\tpublic static void main(String[] args) {\n\t\tString str1 = \"Programming\";\n\t\tString str2 = \"Programming\";\n\t\tString str3 = new String(\"Programming\");\n\t\tSystem.out.println(str1==str2);\n\t\tSystem.out.println(str1==str3);\n\t\tSystem.out.println(str1.equals(str3));\n\t\tSystem.out.println(str2.equals(str3));\n\t}\n}","file":"예상문제은행/문제 20.java","src":"bank","ch":10,"type":"code"},{"id":63,"title":"예상문제 21","lang":"Java","input":"","output":"BDCDD","expl":"a.paint() → SubObject.paint: super.paint()가 'B' 출력 후 draw() 호출 → 오버라이딩된 SubObject.draw → 'D'. 이어서 'C', draw() → 'D'. 마지막 a.draw() → 'D'. BDCDD.","code":"class SuperObject {\n\tpublic void draw() {\n\t\tSystem.out.println(\"A\");\n\t\tdraw();\n\t}\n\tpublic void paint() {\n\t\tSystem.out.print('B');\n\t\tdraw();\n\t}\n}\nclass SubObject extends SuperObject {\n\tpublic void paint() {\n\t\tsuper.paint();\n\t\tSystem.out.print('C');\n\t\tdraw();\n\t}\n\tpublic void draw() {\n\t\tSystem.out.print('D');\n\t}\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tSuperObject a = new SubObject();\n\t\ta.paint();\n\t\ta.draw();\n\t}\n}","file":"예상문제은행/문제 21.java","src":"bank","ch":10,"type":"code"},{"id":64,"title":"예상문제 22","lang":"Java","input":"","output":"4","expl":"싱글톤 패턴. get()은 항상 같은 인스턴스를 반환하므로 count는 하나. count() 4번 호출 → 4.","code":"class Connection {\n\tprivate static Connection _inst = null;\n\tprivate int count = 0;\n\tpublic static Connection get() {\n\t\tif(_inst == null) {\n\t\t\t_inst = new Connection();\n\t\t\treturn _inst;\n\t\t}\n\t\treturn _inst;\n\t}\n\tpublic void count() { count++; }\n\tpublic int getCount() { return count; }\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tConnection conn1 = Connection.get();\n\t\tconn1.count();\n\t\tConnection conn2 = Connection.get();\n\t\tconn2.count();\n\t\tConnection conn3 = Connection.get();\n\t\tconn3.count();\n\t\tconn1.count();\n\t\tSystem.out.print(conn1.getCount());\n\t}\n}","file":"예상문제은행/문제 22.java","src":"bank","ch":10,"type":"code"},{"id":65,"title":"예상문제 23","lang":"Java","input":"","output":"2","expl":"C.calc 실행: c(n)=c(n-1)+c(n-3), n\u003c=1이면 n 그대로(음수 포함). c(2)=c(1)+c(-1)=0, c(3)=c(2)+c(0)=0, c(4)=c(3)+c(1)=1, c(5)=c(4)+c(2)=1, c(6)=c(5)+c(3)=1, c(7)=c(6)+c(4)=2.","code":"class P {\n\tpublic int calc(int n) {\n\t\tif (n \u003c= 1) return n;\n\t\treturn calc(n - 1) + calc(n - 2);\n\t}\n}\nclass C extends P {\n\tpublic int calc(int n) {\n\t\tif (n \u003c= 1) return n;\n\t\treturn calc(n - 1) + calc(n - 3);\n\t}\n}\npublic class Test {\n\tpublic static void main(String[] args) {\n\t\tP obj = new C();\n\t\tSystem.out.print(obj.calc(7));\n\t}\n}","file":"예상문제은행/문제 23.java","src":"bank","ch":10,"type":"code"},{"id":66,"title":"예상문제 24","lang":"Python","input":"10 20","output":"x의 값 : 10\ny의 값 : 20","expl":"split(' ')로 나눈 두 문자열을 각각 출력. print에서 쉼표로 이어 쓰면 사이에 공백이 들어감.","code":"x, y = input(\"x, y의 값을 공백으로 구분하여 입력 : \").split(' ')\nprint(\"x의 값 :\", x)\nprint(\"y의 값 :\", y)","file":"예상문제은행/문제 24.py","src":"bank","console":"x, y의 값을 공백으로 구분하여 입력 : x의 값 : 10\ny의 값 : 20","ch":10,"type":"code"},{"id":67,"title":"예상문제 25","lang":"Python","input":"","output":"engneing","expl":"a[:3]='eng', a[4:6]='ne', a[29:]='ing' → engneing. 끝 인덱스는 포함되지 않음.","code":"a = \"engineer information programming\"\nb = a[:3]\nc = a[4:6]\nd = a[29:]\ne = b + c + d\nprint(e)","file":"예상문제은행/문제 25.py","src":"bank","ch":10,"type":"code"},{"id":68,"title":"예상문제 26","lang":"Python","input":"","output":"5050","expl":"1부터 100까지 더한 뒤 break → 5050.","code":"i, hap = 0, 0\nwhile 1: \n\ti += 1 \n\thap += i \n\tif i >= 100: \n\t\tbreak\nprint(hap)","file":"예상문제은행/문제 26.py","src":"bank","ch":10,"type":"code"},{"id":69,"title":"예상문제 27","lang":"Java","input":"","output":"1 4 7 10 13 \n2 5 8 11 14 \n3 6 9 12 15 ","expl":"ary[i][j] = j*3 + i + 1. 같은 행에서 3씩 증가, 다음 행은 1씩 밀림. (n은 사용되지 않음)","code":"public class Test {\n\tpublic static void main(String[] args) {\n\t\tint ary[][] = new int[3][5];\n\t\tint n = 1;\n\t\tfor(int i = 0; i \u003c 3; i++) {\n\t\t\tfor(int j = 0; j \u003c 5; j++) {\n\t\t\tary[i][j] = j * 3 + i + 1;\n\t\t\tSystem.out.print(ary[i][j] + \" \");\n\t\t\t}\n\t\t\tSystem.out.println();\n\t\t}\n\t}\n}","file":"예상문제은행/문제 27.java","src":"bank","ch":10,"type":"code"},{"id":70,"title":"예상문제 28","lang":"C","input":"5","output":"120","expl":"재귀 팩토리얼. 입력 5 → 120.","code":"#include \u003cstdio.h>\nint func(int a) {\n\tif (a \u003c= 1) return 1;\n\treturn a * func(a - 1);\n}\nint main() {\n\tint a;\n\tscanf(\"%d\", &a);\n\tprintf(\"%d\", func(a));\n}","file":"예상문제은행/문제 28.c","src":"bank","ch":10,"type":"code"},{"id":71,"title":"예상문제 29","lang":"C","input":"","output":"213465","expl":"스택(LIFO). into=push, take=pop. 5,2 push → pop 2 / 4,1 push → pop 1 / 3 push → pop 3, pop 4 / 6 push → pop 6, pop 5. 비어서 종료 → 213465.","code":"#include \u003cstdio.h>\n#define MAX_SIZE 10\n\nint isWhat[MAX_SIZE];\nint point = -1;\n\nint isEmpty() {\n\tif (point == -1) return 1;\n\treturn 0;\n}\n\nint isFull() {\n\tif (point == 10) return 1;\n\treturn 0;\n}\n\nvoid into(int num) {\n\tif (isFull() == 1) printf(\"Full\");\n\telse isWhat[++point] = num;\n}\n\nint take() {\n\tif (isEmpty() == 1) printf(\"Empty\");\n\telse return isWhat[point--];\n\treturn 0;\n}\n\nmain() {\n\tinto(5); into(2);\n\twhile (!isEmpty()) {\n\t\tprintf(\"%d\", take());\n\t\tinto(4); into(1); printf(\"%d\", take());\n\t\tinto(3); printf(\"%d\", take()); printf(\"%d\", take());\n\t\tinto(6); printf(\"%d\", take()); printf(\"%d\", take());\n\t}\n}","file":"예상문제은행/문제 29.c","src":"bank","ch":10,"type":"code"},{"id":72,"title":"예상문제 30","lang":"C","input":"","output":"29","expl":"13195의 가장 큰 소인수. 13195 = 5 × 7 × 13 × 29 → 29.","code":"#include \u003cstdio.h>\nint isPrime(int number) {\n\tfor (int i = 2; i \u003c number; i++)\n\t\tif (number % i == 0) return 0;\n\treturn 1;\n}\n\nint main() {\n\tint number = 13195;\n\tint max_div = 0;\n\tfor (int i = 2; i \u003c number; i++)\n\t\tif (isPrime(i) == 1 && number % i == 0) max_div = i;\n\tprintf(\"%d\", max_div);\n}","file":"예상문제은행/문제 30.c","src":"bank","ch":10,"type":"code"},{"id":73,"title":"예상문제 31","lang":"Java","input":"","output":"miles traveled : 1\nmiles traveled : 2\nmiles traveled : 3\nmiles traveled : 4\nmiles traveled : 5\n⋯ (중략) ⋯\nmiles traveled : 98\nmiles traveled : 99","expl":"Runnable 구현 → Thread로 실행. ++a \u003c 100 이므로 1부터 99까지 'miles traveled : n'을 0.1초 간격으로 출력.","code":"class Car implements Runnable {\n\tint a;\n\tpublic void run() {\n\t\ttry {\n\t\t\twhile(++a \u003c 100) {\n\t\t\t\tSystem.out.println(\"miles traveled : \" + a);\n\t\t\t\tThread.sleep(100);\n\t\t\t}\n\t\t} catch(Exception E) { }\n\t}\n}\n\npublic class Test {\n\tpublic static void main(String args[]) {\n\t\tThread t1 = new Thread(new Car());\n\t\tt1.start();\n\t}\n}","file":"예상문제은행/문제 31.java","src":"bank","selfGrade":true,"ask":"다음 Java 프로그램의 실행 결과를 쓰시오. (반복되는 줄은 처음 두 줄과 마지막 줄만 써도 됩니다)","ch":10,"type":"code"},{"id":74,"title":"예상문제 32","lang":"C","input":"","output":"1 1 3 2\n3 4 5 3\n3 5 6 4\n3 5 5 3","expl":"지뢰찾기: field가 1인 칸의 자기 자신 포함 주변 9칸에 1씩 더함(chkover로 범위 검사). 출력문은 없고 mines 배열의 최종 값을 묻는 문제. 결과: [1 1 3 2] / [3 4 5 3] / [3 5 6 4] / [3 5 5 3].","code":"#include \u003cstdio.h>\nmain( ) {\n\tint field[4][4] = { {0,1,0,1}, {0,0,0,1}, {1,1,1,0}, {0,1,1,1} };\n\tint mines[4][4] = { {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0} };\n\tint w = 4, h = 4;\n\tfor (int y = 0; y \u003c h; y++) {\n\t\tfor (int x = 0; x \u003c w; x++) {\n\t\t\tif (field[y][x] == 0) continue;\n\t\t\tfor (int j = y - 1; j \u003c= y + 1; j++) {\n\t\t\t\tfor (int i = x - 1; i \u003c= x + 1; i++) {\n\t\t\t\t\tif (chkover(w, h, j, i) == 1)\n\t\t\t\t\t\tmines[j][i] += 1;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n\nint chkover(int w, int h, int j, int i) {\n\tif (i >= 0 && i \u003c w && j >= 0 && j \u003c h) return 1;\n\treturn 0;\n}","file":"예상문제은행/문제 32.c","src":"bank","ask":"출력문은 없습니다. 실행이 끝난 뒤 mines 배열의 값을 한 행씩 줄을 바꿔 쓰시오. (원소는 공백으로 구분)","ch":10,"type":"code"},{"id":75,"title":"예상문제 33","lang":"Java","input":"","output":"1a3b3","expl":"arr[0]과 arr[2]의 참조를 교환해도 a, b, c 변수는 그대로. arr[1].v = arr[0].v → b.v = c.v = 3. a.v는 1 → 1a3b3.","code":"public class Main { \n    public static class BO { \n        public int v; public BO(int v) { \n            this.v = v; \n        } \n    } \n    public static void main(String[] args) { \n        BO a = new BO(1); \n        BO b = new BO(2); \n        BO c = new BO(3); \n        BO[] arr = {a, b, c}; \n        BO t = arr[0]; \n        arr[0] = arr[2]; \n        arr[2] = t; \n        arr[1].v = arr[0].v; \n        System.out.println(a.v + \"a\" + b.v + \"b\" + c.v); \n    }\n}","file":"예상문제은행/문제 33.java","src":"bank","ch":10,"type":"code"},{"id":76,"title":"예상문제 34","lang":"Python","input":"","output":"5","expl":"주의: 이 파일은 return nodes[0]이 for 안에 들여쓰기되어 있어 첫 자식(5)만 연결됨 → 홀수 레벨(1) 값 5만 더해 5. return이 for 밖에 있는 정상 코드라면 트리 전체가 만들어져 레벨 1의 5+8 = 13. 시험지의 들여쓰기를 꼭 확인할 것.","code":"class Node: \n    def __init__(self, value): \n        self.value = value \n        self.children = []\ndef tree(li): \n    nodes = [Node(i) for i in li] \n    for i in range(1, len(li)): \n        nodes[(i - 1) // 2].children.append(nodes[i]) \n        return nodes[0] \ndef calc(node, level=0): \n    if node is None: \n        return 0 \n    return (node.value if level % 2 == 1 else 0) + sum(calc(n, level + 1) for n in node.children)\nli = [3, 5, 8, 12, 15, 18, 21]\nroot = tree(li)\nprint(calc(root))","file":"예상문제은행/문제 34.py","src":"bank","ch":10,"type":"code"},{"id":77,"title":"예상문제 35","lang":"Java","input":"","output":"AB","expl":"Tri.A.name()은 \"A\", 길이 1. values()[1] = B → code는 \"AB\".","code":"enum Tri { \n    A(\"A\"), B(\"AB\"), C(\"ABC\"); \n    private String code; \n    Tri(String code) { \n        this.code = code; \n        \n    }\n    public String code( ) { \n        return code;\n        }\n} \n\npublic class Main { \n    public static void main(String[] args) { \n        Tri t = Tri.values( )[Tri.A.name( ).length( )]; \n        System.out.print(t.code( ));\n        }\n\n}","file":"예상문제은행/문제 35.java","src":"bank","ch":10,"type":"code"},{"id":78,"title":"예상문제 37","lang":"C","input":"","output":"변환된 문자열 : Nd sc 1","expl":"문제 10과 동일. 대문자 I → N, 소문자 +10 (t→d, i→s, s→c), 숫자 8 → 1 → 'Nd sc 1'.","code":"#include \u003cstdio.h>\n#include \u003cctype.h>\nint main( ) { \n    char *p = \"It is 8\"; \n    char result[100]; \n    int i; \n    for(i = 0; p[i] != '\\0'; i++) { \n        if(isupper(p[i])) \n            result[i] = (p[i] - 'A'+ 5) % 25 + 'A'; \n        else if(islower(p[i])) \n            result[i] = (p[i] - 'a'+ 10) % 26 + 'a'; \n        else if(isdigit(p[i])) \n            result[i] = (p[i] - '0'+ 3) % 10 + '0'; \n        else if(!(isupper(p[i]) || islower(p[i]) || isdigit(p[i]))) \n            result[i] = p[i]; \n    } \n    result[i] = '\\0'; \n    printf(\"변환된 문자열 : %s\\n\", result);\n    return 0;\n}","file":"예상문제은행/문제 37.c","src":"bank","ch":10,"type":"code"},{"id":79,"title":"예상문제 38","lang":"Python","input":"","output":"ab0 ca1","expl":"주의: 이 파일은 return result가 for 안에 들여쓰기되어 있어 첫 비교 한 번만 수행 → cnt(str,'ca')=0, cnt(str,'ab')=1 → ab0 ca1. return이 for 밖이라면 'ca' 3개, 'ab' 3개 → ab3 ca3. f-string의 라벨(ab에 p1='ca')이 바뀌어 있는 것도 함정.","code":"def cnt(str, p): \n    result = 0; \n    for i in range(len(str)): \n        sub = str[i:i+len(p)] \n        if sub == p: \n            result += 1 \n        return result\nstr = \"abdcabcabca\"\np1 = \"ca\"\np2 = \"ab\"\nprint(f'ab{cnt(str, p1)} ca{cnt(str, p2)}')","file":"예상문제은행/문제 38.py","src":"bank","ch":10,"type":"code"},{"id":80,"title":"예상문제 39","lang":"Java","input":"","output":"B0","expl":"제네릭 T는 컴파일 시 Object로 취급되어 print(Object)가 선택됨 → B0. 오버로딩은 컴파일 시점의 정적 타입으로 결정.","code":"class Printer { \n    void print(Integer a) { \n        System.out.print(\"A\" + a); \n    } \n    void print(Object a) {\n        System.out.print(\"B\" + a);\n    }\n    void print(Number a) { \n        System.out.print(\"C\" + a);\n    }\n}\n\npublic class Main { \n    public static void main(String[] args) { \n        new Collection\u003c>(0).print( );\n    } \n    public static class Collection\u003cT> { \n        T value; \n        public Collection(T t) { \n            value = t;\n        } \n        public void print( ) { \n            new Printer( ).print(value);\n        }\n    }\n}","file":"예상문제은행/문제 39.java","src":"bank","ch":10,"type":"code"},{"id":81,"src":"extra","type":"blank","lang":"이론","ch":1,"title":"XP 핵심 가치","ask":"XP(eXtreme Programming)의 5가지 핵심 가치 중 빈칸에 들어갈 가치를 쓰시오.","body":"의사소통(Communication), 단순성(Simplicity), 용기(Courage), ( ① ), ( ② )","anyOrder":true,"blanks":[{"a":["존중","Respect"]},{"a":["피드백","Feedback"]}],"expl":"XP의 5가지 핵심 가치는 의사소통, 단순성, 용기, 존중, 피드백이다. 순서는 상관없다."},{"id":82,"src":"extra","type":"blank","lang":"이론","ch":1,"title":"UML 관계","ask":"다음 설명에 해당하는 UML 관계를 쓰시오.","body":"하나의 사물이 다른 사물에 비해 더 일반적인지 구체적인지를 표현하는 관계로, 상위 클래스와 하위 클래스 사이의 is-a 관계를 나타낸다. 화살표는 일반적인 쪽(부모)을 향한다.","blanks":[{"a":["일반화","일반화 관계","Generalization"]}],"expl":"일반화(Generalization) 관계는 상속 관계라고 보면 된다. 예: 자동차 ← 승용차, 트럭."},{"id":83,"src":"extra","type":"blank","lang":"이론","ch":1,"title":"UML 다이어그램","ask":"다음 설명에 해당하는 UML 다이어그램을 쓰시오.","body":"시스템이나 객체들이 주고받는 메시지를 시간의 흐름에 따라 표현한 행위(동적) 다이어그램이다. 구성 요소로 액터, 객체, 생명선, 실행 상자, 메시지 등이 있다.","blanks":[{"a":["시퀀스 다이어그램","시퀀스","순차 다이어그램","Sequence Diagram","Sequence"]}],"expl":"시퀀스 다이어그램은 \"시간 순서에 따른 메시지 교환\"이 핵심 키워드다. 생명선(Lifeline)과 실행 상자(Activation Box)가 나오면 시퀀스 다이어그램."},{"id":84,"src":"extra","type":"blank","lang":"이론","ch":1,"title":"UML 포함 관계","ask":"다음 설명에 해당하는 UML 관계를 쓰시오.","body":"집약 관계의 특수한 형태로, 포함하는 사물(전체)의 변화가 포함되는 사물(부분)에게 영향을 미치는 관계이다. 전체가 사라지면 부분도 함께 사라진다. 예: 문과 그 문만 열 수 있는 열쇠 — 문이 없어지면 그 열쇠도 쓸모가 없어진다.","blanks":[{"a":["포함 관계","포함","합성","합성 관계","Composition"]}],"expl":"집약(Aggregation)은 부분이 전체와 독립적으로 존재할 수 있고(빈 마름모), 포함(Composition)은 생명주기를 함께한다(채워진 마름모)."},{"id":85,"src":"extra","type":"blank","lang":"이론","ch":1,"title":"요구사항 개발 프로세스","ask":"요구사항 개발 프로세스의 단계를 순서대로 쓰시오.","choices":["명세(Specification)","확인(Validation)","도출(Elicitation)","분석(Analysis)"],"body":"( ① ) → ( ② ) → ( ③ ) → ( ④ )","blanks":[{"a":["도출","Elicitation"]},{"a":["분석","Analysis"]},{"a":["명세","Specification"]},{"a":["확인","Validation","검증"]}],"expl":"요구사항 개발은 도출 → 분석 → 명세 → 확인(검증) 순서다. \"도분명확\"으로 외우면 편하다."},{"id":86,"src":"extra","type":"blank","lang":"이론","ch":1,"title":"스크럼 백로그","ask":"다음 설명에 해당하는 스크럼(Scrum) 용어를 쓰시오.","body":"제품 개발에 필요한 요구사항을 모두 모아 우선순위를 부여해 놓은 목록이다. 제품 책임자(PO)가 관리하며, 이 목록을 바탕으로 릴리즈 계획을 세운다.","blanks":[{"a":["제품 백로그","Product Backlog"]}],"expl":"제품 백로그(Product Backlog)에서 이번 스프린트에 할 일을 골라 만든 것이 스프린트 백로그(Sprint Backlog)다."},{"id":87,"src":"extra","type":"blank","lang":"이론","ch":1,"title":"COCOMO 유형","ask":"다음 설명에 해당하는 COCOMO 모형의 프로젝트 유형을 쓰시오.","body":"조직형과 내장형의 중간형으로, 트랜잭션 처리 시스템이나 운영체제, 데이터베이스 관리 시스템 등의 30만(300KDSI) 라인 이하의 소프트웨어를 개발하는 유형이다.","blanks":[{"a":["반분리형","Semi-Detached","Semi Detached"]}],"expl":"조직형(Organic): 5만 라인 이하 사무처리용. 반분리형(Semi-Detached): 30만 라인 이하 OS, DBMS. 내장형(Embedded): 30만 라인 이상, 미사일 유도·신호기 제어 같은 최대형."},{"id":88,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"이상(Anomaly)","ask":"빈칸에 들어갈 알맞은 용어를 쓰시오.","body":"릴레이션 설계가 잘못되어 데이터의 중복으로 인해 삽입, 삭제, 갱신 시 예기치 않게 발생하는 곤란한 현상을 ( ① )이라 한다.","blanks":[{"a":["이상","이상 현상","Anomaly"]}],"expl":"이상(Anomaly)에는 삽입 이상, 삭제 이상, 갱신 이상이 있다. 이를 해결하기 위해 정규화를 수행한다."},{"id":89,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"정규화 단계","ask":"빈칸에 들어갈 알맞은 용어를 쓰시오.","body":"1NF에서 2NF로 정규화할 때는 ( ① )을 제거하고,\n2NF에서 3NF로 정규화할 때는 ( ② )을 제거한다.","blanks":[{"a":["부분 함수적 종속","부분 함수 종속","부분 종속","부분적 함수 종속"]},{"a":["이행적 함수적 종속","이행적 함수 종속","이행 함수 종속","이행 종속","이행적 종속"]}],"expl":"1NF: 도메인이 원자값. 2NF: 부분 함수적 종속 제거. 3NF: 이행적 함수적 종속 제거. BCNF: 결정자이면서 후보키가 아닌 것 제거. 4NF: 다치 종속 제거. 5NF: 조인 종속 제거. \"도부이결다조\"로 외운다."},{"id":90,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"트랜잭션 특성","ask":"트랜잭션의 특성 중 다음 설명에 해당하는 것을 쓰시오.","body":"① 트랜잭션의 연산은 데이터베이스에 모두 반영되든지 아니면 전혀 반영되지 않아야 한다. (All or Nothing)\n② 성공적으로 완료된 트랜잭션의 결과는 시스템이 고장 나더라도 영구적으로 반영되어야 한다.","blanks":[{"a":["원자성","Atomicity"]},{"a":["지속성","영속성","Durability"]}],"expl":"ACID: 원자성(Atomicity), 일관성(Consistency), 독립성/격리성(Isolation), 지속성/영속성(Durability)."},{"id":91,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"무결성 제약조건","ask":"다음 설명에 해당하는 무결성 제약조건을 쓰시오.","body":"① 기본 테이블의 기본키를 구성하는 어떤 속성도 NULL 값이나 중복 값을 가질 수 없다.\n② 외래키 값은 NULL이거나 참조 릴레이션의 기본키 값과 동일해야 한다.\n③ 주어진 속성 값이 정의된 도메인에 속한 값이어야 한다.","blanks":[{"a":["개체 무결성","개체","Entity Integrity"]},{"a":["참조 무결성","참조","Referential Integrity"]},{"a":["도메인 무결성","도메인","Domain Integrity"]}],"expl":"2025년 실기에도 나온 주제. 기본키 → 개체 무결성, 외래키 → 참조 무결성, 값의 범위 → 도메인 무결성."},{"id":92,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"관계대수 연산자","ask":"다음 설명에 해당하는 관계대수 연산의 이름을 쓰시오.","body":"① 릴레이션에 존재하는 튜플 중에서 선택 조건을 만족하는 튜플의 부분집합을 구하여 새로운 릴레이션을 만든다. 수평 연산이라고도 하며 기호는 σ이다.\n② 주어진 릴레이션에서 속성 리스트에 제시된 속성 값만을 추출하여 새로운 릴레이션을 만든다. 수직 연산이라고도 하며 기호는 π이다.","blanks":[{"a":["Select","셀렉트","선택","σ"]},{"a":["Project","프로젝트","추출","π"]}],"expl":"Select(σ)는 행(튜플)을 고르고, Project(π)는 열(속성)을 고른다. Join은 ⋈, Division은 ÷."},{"id":93,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"키의 종류","ask":"다음 설명에 해당하는 키(Key)를 쓰시오.","body":"① 후보키가 둘 이상일 때 기본키를 제외한 나머지 후보키\n② 유일성은 만족하지만 최소성은 만족하지 못하는 키","blanks":[{"a":["대체키","대체 키","Alternate Key"]},{"a":["슈퍼키","슈퍼 키","Super Key"]}],"expl":"후보키 = 유일성 + 최소성. 기본키 = 후보키 중 선택된 키. 대체키 = 선택되지 않은 후보키. 슈퍼키 = 유일성만 만족."},{"id":94,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"차수와 카디널리티","ask":"다음 [학생] 릴레이션의 차수(Degree)와 카디널리티(Cardinality)를 쓰시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"body":"① 차수(Degree): ( )\n② 카디널리티(Cardinality): ( )","blanks":[{"a":["5"]},{"a":["6"]}],"expl":"차수는 속성(열)의 수 = 5, 카디널리티는 튜플(행)의 수 = 6. 헷갈리면 \"Degree = 디그리 = 가로 속성 개수\"로 기억."},{"id":95,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"반정규화","ask":"다음 설명에 해당하는 용어를 쓰시오.","body":"정규화된 엔티티, 속성, 관계에 대해 시스템의 성능 향상과 개발 및 운영의 편의성 등을 위해 중복, 통합, 분리 등을 수행하여 의도적으로 정규화 원칙을 위배하는 행위이다.","blanks":[{"a":["반정규화","비정규화","역정규화","Denormalization"]}],"expl":"반정규화 방법: 테이블 통합/분할, 중복 테이블 추가, 중복 속성 추가 등. 성능은 좋아지지만 데이터 일관성·무결성이 깨질 수 있다."},{"id":96,"src":"extra","type":"blank","lang":"이론","ch":2,"title":"스키마 3계층","ask":"다음 설명에 해당하는 스키마를 쓰시오.","body":"① 사용자나 응용 프로그래머가 각 개인의 입장에서 필요로 하는 데이터베이스의 논리적 구조 (서브 스키마)\n② 데이터베이스의 전체적인 논리적 구조로, 모든 응용 프로그램이나 사용자들이 필요로 하는 데이터를 종합한 조직 전체의 데이터베이스. 하나만 존재한다.\n③ 물리적 저장장치의 입장에서 본 데이터베이스 구조. 레코드 형식, 인덱스 유무, 저장 순서 등을 정의한다.","blanks":[{"a":["외부 스키마","외부","External Schema","서브 스키마"]},{"a":["개념 스키마","개념","Conceptual Schema"]},{"a":["내부 스키마","내부","Internal Schema"]}],"expl":"외부(사용자 관점) → 개념(조직 전체 관점, 하나) → 내부(저장장치 관점)."},{"id":97,"src":"extra","type":"blank","lang":"이론","ch":3,"title":"EAI 구축 유형","ask":"다음 설명에 해당하는 EAI 구축 유형을 보기에서 골라 쓰시오.","choices":["Point-to-Point","Hub & Spoke","Message Bus","Hybrid"],"body":"① 가장 기본적인 애플리케이션 통합 방식으로, 애플리케이션을 1:1로 연결한다. 변경 및 재사용이 어렵다.\n② 단일 접점인 허브 시스템을 통해 데이터를 전송하는 중앙 집중형 방식이다. 허브 장애 시 전체 시스템에 영향을 미친다.\n③ 애플리케이션 사이에 미들웨어를 두어 처리하는 방식으로, 확장성이 뛰어나 대용량 처리가 가능하다.","blanks":[{"a":["Point-to-Point","PointtoPoint","P2P"]},{"a":["Hub & Spoke","Hub&Spoke","Hub and Spoke","허브앤스포크"]},{"a":["Message Bus","MessageBus","메시지 버스"]}],"expl":"Hybrid는 그룹 내에서는 Hub & Spoke, 그룹 간에는 Message Bus를 쓰는 혼합 방식이다."},{"id":98,"src":"extra","type":"blank","lang":"이론","ch":3,"title":"웹 서비스 구성","ask":"다음 설명에 해당하는 웹 서비스 구성 요소를 쓰시오.","body":"① HTTP, HTTPS, SMTP 등을 사용하여 XML 기반의 메시지를 네트워크 상에서 교환하는 프로토콜\n② 웹 서비스명, 제공 위치, 메시지 포맷, 프로토콜 정보 등 웹 서비스에 대한 상세 정보가 기술된 XML 형식의 언어\n③ 웹 서비스에 대한 정보인 WSDL을 등록하고 검색하기 위한 저장소","blanks":[{"a":["SOAP"]},{"a":["WSDL"]},{"a":["UDDI"]}],"expl":"SOAP(통신 프로토콜), WSDL(서비스 명세서), UDDI(등록·검색 저장소). 웹 서비스 3요소."},{"id":99,"src":"extra","type":"blank","lang":"이론","ch":3,"title":"JSON","ask":"다음 설명에 해당하는 데이터 포맷을 쓰시오.","body":"속성-값 쌍(Attribute-Value Pairs)으로 이루어진 데이터 객체를 전달하기 위해 사람이 읽을 수 있는 텍스트를 사용하는 개방형 표준 포맷이다. 비동기 처리에 사용되는 AJAX에서 XML을 대체하여 사용되고 있다.","blanks":[{"a":["JSON","JavaScript Object Notation"]}],"expl":"JSON(JavaScript Object Notation). 예: {\"name\": \"Kim\", \"age\": 25}"},{"id":100,"src":"extra","type":"blank","lang":"이론","ch":3,"title":"AJAX","ask":"다음 설명에 해당하는 기술을 쓰시오.","body":"자바스크립트를 사용하여 웹 페이지 전체를 다시 로드하지 않고, 필요한 일부분의 데이터만 서버와 비동기 방식으로 주고받아 웹 페이지를 갱신하는 기술이다.","blanks":[{"a":["AJAX","Ajax","Asynchronous JavaScript and XML"]}],"expl":"AJAX(Asynchronous JavaScript and XML). 검색창 자동완성이 대표적인 예다."},{"id":101,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"결합도 순서","ask":"보기의 결합도를 결합도가 약한 것부터 강한 순서로 쓰시오.","choices":["내용 결합도","공통 결합도","제어 결합도","자료 결합도","스탬프 결합도","외부 결합도"],"body":"( ① ) \u003c ( ② ) \u003c ( ③ ) \u003c ( ④ ) \u003c ( ⑤ ) \u003c ( ⑥ )","blanks":[{"a":["자료 결합도","자료","Data Coupling","Data"]},{"a":["스탬프 결합도","스탬프","Stamp Coupling","Stamp"]},{"a":["제어 결합도","제어","Control Coupling","Control"]},{"a":["외부 결합도","외부","External Coupling","External"]},{"a":["공통 결합도","공통","Common Coupling","Common"]},{"a":["내용 결합도","내용","Content Coupling","Content"]}],"expl":"약함 → 강함: 자료 \u003c 스탬프 \u003c 제어 \u003c 외부 \u003c 공통 \u003c 내용. \"자스제외공내\"로 외운다. 좋은 설계는 결합도는 약하게, 응집도는 강하게."},{"id":102,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"제어 결합도","ask":"다음 설명에 해당하는 결합도를 쓰시오.","body":"어떤 모듈이 다른 모듈 내부의 논리적인 흐름을 제어하기 위해 제어 신호(Flag)를 이용하여 통신하거나 제어 요소를 전달하는 결합도이다. 하위 모듈에서 상위 모듈로 제어 신호가 이동하여 상위 모듈에게 처리 명령을 내리는 권리 전도 현상이 발생할 수 있다.","blanks":[{"a":["제어 결합도","제어","Control Coupling"]}],"expl":"\"제어 신호(Flag)\", \"권리 전도\"가 나오면 제어 결합도."},{"id":103,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"응집도","ask":"다음 설명에 해당하는 응집도를 쓰시오.","body":"① 모듈 내부의 모든 기능 요소들이 단일 문제와 연관되어 수행되는 경우의 응집도\n② 모듈 내 하나의 활동으로부터 나온 출력 데이터를 그 다음 활동의 입력 데이터로 사용할 경우의 응집도","blanks":[{"a":["기능적 응집도","기능적","기능 응집도","Functional Cohesion"]},{"a":["순차적 응집도","순차적","순차 응집도","Sequential Cohesion"]}],"expl":"강함 → 약함: 기능적 > 순차적 > 교환적 > 절차적 > 시간적 > 논리적 > 우연적. \"기순교절시논우\". 순차적(출력→입력)과 절차적(기능을 순차적으로 수행)을 구분할 것."},{"id":104,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"Observer 패턴","ask":"다음 설명에 해당하는 디자인 패턴을 쓰시오.","body":"한 객체의 상태가 변화하면 객체에 상속되어 있는 다른 객체들에게 변화된 상태를 전달하는 패턴으로, 일대다의 의존성을 정의한다. 주로 분산된 시스템 간에 이벤트를 생성·발행(Publish)하고, 이를 수신(Subscribe)해야 할 때 이용한다.","blanks":[{"a":["Observer","옵저버","Observer Pattern","옵서버"]}],"expl":"행위 패턴. \"상태 변화를 알림\", \"일대다 의존\", \"발행/구독\"이 키워드."},{"id":105,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"Singleton 패턴","ask":"다음 설명에 해당하는 디자인 패턴을 쓰시오.","body":"하나의 객체를 생성하면 생성된 객체를 어디서든 참조할 수 있지만, 여러 프로세스가 동시에 참조할 수는 없다. 클래스 내에서 인스턴스가 하나뿐임을 보장하며, 불필요한 메모리 낭비를 최소화할 수 있다.","blanks":[{"a":["Singleton","싱글톤","싱글턴","Singleton Pattern"]}],"expl":"생성 패턴. 10장 예상문제 22번(Java 코드)도 싱글톤 패턴 문제다."},{"id":106,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"Proxy 패턴","ask":"다음 설명에 해당하는 디자인 패턴을 쓰시오.","body":"접근이 어려운 객체와 여기에 연결하려는 객체 사이에서 인터페이스 역할을 수행하는 패턴이다. 네트워크 연결, 메모리의 대용량 객체로의 접근 등에 주로 이용한다.","blanks":[{"a":["Proxy","프록시","프락시","Proxy Pattern"]}],"expl":"구조 패턴. \"대리자\", \"중간에서 인터페이스 역할\"이 키워드."},{"id":107,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"Abstract Factory 패턴","ask":"다음 설명에 해당하는 디자인 패턴을 쓰시오.","body":"구체적인 클래스에 의존하지 않고, 서로 연관되거나 의존적인 객체들의 그룹으로 생성하여 추상적으로 표현한다. 연관된 서브 클래스를 묶어 한 번에 교체하는 것이 가능하다.","blanks":[{"a":["Abstract Factory","AbstractFactory","추상 팩토리","추상팩토리"]}],"expl":"생성 패턴. 생성 패턴 5가지: Abstract Factory, Builder, Factory Method, Prototype, Singleton."},{"id":108,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"팬인과 팬아웃","ask":"다음과 같이 모듈이 호출될 때, 물음에 답하시오.","body":"A → B, C, D\nB → E, F\nC → F\nD → F, G\n(화살표 왼쪽 모듈이 오른쪽 모듈들을 호출한다)\n\n① 모듈 F의 팬인(Fan-In)\n② 모듈 A의 팬아웃(Fan-Out)","blanks":[{"a":["3"]},{"a":["3"]}],"expl":"팬인 = 자신을 호출하는 상위 모듈 수. F는 B, C, D가 호출 → 3. 팬아웃 = 자신이 호출하는 하위 모듈 수. A는 B, C, D를 호출 → 3."},{"id":109,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"형상 통제","ask":"다음 설명에 해당하는 형상 관리 기능을 쓰시오.","body":"식별된 형상 항목에 대한 변경 요구를 검토하여 현재의 기준선(Baseline)이 잘 반영될 수 있도록 조정하는 작업이다. 형상 통제 위원회의 승인을 통해 변경이 이루어진다.","blanks":[{"a":["형상 통제","변경 통제","Configuration Control"]}],"expl":"형상 관리 기능: 형상 식별 → 버전 제어 → 형상 통제 → 형상 감사 → 형상 기록(보고)."},{"id":110,"src":"extra","type":"blank","lang":"이론","ch":4,"title":"Git","ask":"다음 설명에 해당하는 버전 관리 도구를 쓰시오.","body":"리누스 토르발스가 리눅스 커널 개발에 이용하려고 개발한 분산 버전 관리 시스템이다. 원격 저장소와 로컬 저장소가 존재하며, 로컬 저장소에서 버전 관리가 진행되므로 작업 속도가 빠르다.","blanks":[{"a":["Git","깃"]}],"expl":"공유 폴더 방식: RCS, SCCS. 클라이언트/서버 방식: CVS, SVN. 분산 저장소 방식: Git, Bitkeeper."},{"id":111,"src":"extra","type":"blank","lang":"이론","ch":5,"title":"인터페이스 구현 검증 도구","ask":"다음 설명에 해당하는 인터페이스 구현 검증 도구를 보기에서 골라 쓰시오.","choices":["xUnit","STAF","FitNesse","NTAF","Selenium","watir"],"body":"① 서비스 호출 테스트 도구로, 크로스 플랫폼, 분산 소프트웨어 테스트 환경을 조성할 수 있도록 지원한다. 각 테스트 대상 분산 환경에 데몬을 사용하여 테스트를 수행한다.\n② 웹 기반 테스트 케이스 설계, 실행, 결과 확인 등을 지원하는 테스트 프레임워크이다.\n③ 다양한 브라우저 및 개발 언어를 지원하는 웹 애플리케이션 테스트 프레임워크이다.","blanks":[{"a":["STAF"]},{"a":["FitNesse","Fitnesse"]},{"a":["Selenium","셀레니움"]}],"expl":"NTAF는 STAF와 FitNesse를 통합한 NHN의 자동화 프레임워크, watir는 Ruby를 사용하는 도구, xUnit은 JUnit·CppUnit 등 단위 테스트 프레임워크."},{"id":112,"src":"extra","type":"blank","lang":"이론","ch":5,"title":"IPSec","ask":"다음 설명에 해당하는 보안 프로토콜을 쓰시오.","body":"네트워크 계층에서 IP 패킷 단위의 데이터 변조 방지 및 은닉 기능을 제공하는 프로토콜이다. 전송 모드와 터널 모드를 지원하며, AH와 ESP를 이용한다.","blanks":[{"a":["IPSec","IPsec","IP Security"]}],"expl":"인터페이스 보안 기능은 네트워크 영역(IPSec, SSL/TLS, S-HTTP), 애플리케이션 영역, 데이터베이스 영역에 적용한다."},{"id":113,"src":"extra","type":"blank","lang":"이론","ch":5,"title":"APM","ask":"다음 설명에 해당하는 용어를 영문 약어로 쓰시오.","body":"애플리케이션의 성능을 안정적으로 관리하기 위해 다양한 모니터링 도구를 이용하여 부하량, 접속자 파악 및 장애 진단 등의 기능을 제공한다. 리소스 방식과 엔드투엔드(End-to-End) 방식이 있으며, Scouter, Jennifer 등이 대표적인 도구다.","blanks":[{"a":["APM","Application Performance Management","Application Performance Monitoring"]}],"expl":"APM(Application Performance Management/Monitoring). 인터페이스 구현 감시 도구로 쓰인다."},{"id":114,"src":"extra","type":"blank","lang":"이론","ch":5,"title":"JUnit","ask":"다음 설명에 해당하는 도구를 쓰시오.","body":"Java 프로그래밍 언어를 이용한 xUnit 계열의 단위 테스트 프레임워크로, 테스트 코드를 작성하고 반복적으로 실행할 수 있도록 지원한다.","blanks":[{"a":["JUnit","제이유닛"]}],"expl":"xUnit 계열: JUnit(Java), CppUnit(C++), NUnit(.NET), PyUnit(Python) 등."},{"id":115,"src":"extra","type":"blank","lang":"이론","ch":6,"title":"UI 설계 원칙","ask":"다음 설명에 해당하는 UI 설계 원칙을 보기에서 골라 쓰시오.","choices":["직관성","유효성","학습성","유연성"],"body":"① 누구나 쉽게 이해하고 사용할 수 있어야 한다.\n② 사용자의 목적을 정확하고 완벽하게 달성해야 한다.\n③ 누구나 쉽게 배우고 익힐 수 있어야 한다.\n④ 사용자의 요구사항을 최대한 수용하고 실수를 최소화해야 한다.","blanks":[{"a":["직관성"]},{"a":["유효성"]},{"a":["학습성"]},{"a":["유연성"]}],"expl":"UI 기본 원칙 4가지: 직관성, 유효성, 학습성, 유연성. \"직유학유\"로 외운다."},{"id":116,"src":"extra","type":"blank","lang":"이론","ch":6,"title":"UI 유형","ask":"다음 설명에 해당하는 UI 유형을 영문 약어로 쓰시오.","body":"① 명령과 출력이 텍스트 형태로 이루어지는 인터페이스\n② 사용자의 말이나 행동으로 기기를 조작하는 인터페이스","blanks":[{"a":["CLI","Command Line Interface"]},{"a":["NUI","Natural User Interface"]}],"expl":"CLI(텍스트), GUI(그래픽·마우스), NUI(말·행동), VUI(음성), OUI(유기적 상호작용, 모든 사물이 입출력장치)."},{"id":117,"src":"extra","type":"blank","lang":"이론","ch":6,"title":"UX","ask":"다음 설명에 해당하는 용어를 영문 약어로 쓰시오.","body":"사용자가 시스템이나 서비스를 이용하면서 느끼고 생각하는 총체적인 경험을 말한다. 단순히 기능이나 절차상의 만족뿐 아니라 전반적인 지각 가능한 모든 면에서 사용자가 참여, 사용, 관찰하고 상호 교감을 통해서 알 수 있는 가치 있는 경험이다.","blanks":[{"a":["UX","User Experience","사용자 경험"]}],"expl":"UI는 사용자와 시스템 사이의 접점(수단), UX는 그 과정에서 얻는 경험. UX 특징: 주관성, 정황성, 총체성."},{"id":118,"src":"extra","type":"blank","lang":"이론","ch":6,"title":"감성공학","ask":"다음 설명에 해당하는 용어를 쓰시오.","body":"제품이나 작업환경을 사용자의 감성에 알맞도록 설계 및 제작하는 기술로, 인간의 감성을 구체적이고 과학적으로 측정·분석하여 이를 제품 개발이나 환경 설계에 적용한다.","blanks":[{"a":["감성공학","감성 공학","Human Sensibility Ergonomics"]}],"expl":"감성공학의 요소화 기술: 인간의 감성 특성 파악, 감성 표현, 감성 측정, 감성 시스템 구현 등."},{"id":119,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"블랙박스 테스트 기법","ask":"다음 설명에 해당하는 블랙박스 테스트 기법을 쓰시오.","body":"① 입력 조건의 중간값보다 경계값에서 오류가 발생될 확률이 높다는 점을 이용하여 입력 조건의 경계값을 테스트 케이스로 선정한다.\n② 입력 데이터의 영역을 유사한 도메인별로 유효값과 무효값을 그룹핑하여 나누고, 대표값을 테스트 케이스로 도출한다.\n③ 입력 데이터 간의 관계와 출력에 영향을 미치는 상황을 체계적으로 분석한 다음 효용성이 높은 테스트 케이스를 선정한다.","blanks":[{"a":["경계값 분석","경계값분석","경계값","Boundary Value Analysis"]},{"a":["동치 분할 검사","동치 분할","동등 분할","동치분할","동등분할","Equivalence Partitioning"]},{"a":["원인-효과 그래프 검사","원인 효과 그래프","원인-효과 그래프","원인 결과 그래프","원인-결과 그래프","Cause-Effect Graph"]}],"expl":"블랙박스(명세 기반): 동치 분할, 경계값 분석, 원인-효과 그래프, 오류 예측, 비교 검사. 화이트박스(구조 기반): 기초 경로, 제어 구조(조건·루프·데이터 흐름)."},{"id":120,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"테스트 커버리지","ask":"다음 설명에 해당하는 커버리지를 쓰시오.","body":"① 프로그램 내의 모든 문장을 적어도 한 번 이상 수행한다.\n② 결정 포인트 내의 전체 조건식이 적어도 한 번은 참과 거짓의 결과를 수행한다.\n③ 결정 포인트 내에 있는 각 개별 조건식이 전체 조건식의 결과와 관계없이 적어도 한 번은 참과 거짓의 결과를 수행한다.","blanks":[{"a":["구문 커버리지","문장 커버리지","구문","문장","Statement Coverage"]},{"a":["결정 커버리지","분기 커버리지","결정","분기","Decision Coverage","Branch Coverage"]},{"a":["조건 커버리지","조건","Condition Coverage"]}],"expl":"구문(문장) → 결정(분기, 전체 조건식) → 조건(개별 조건식) → 조건/결정 → 변경 조건/결정(MC/DC) → 다중 조건."},{"id":121,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"스텁과 드라이버","ask":"빈칸에 들어갈 알맞은 용어를 쓰시오.","body":"상향식 통합 테스트에서는 상위 모듈 역할을 대신하는 ( ① )를 사용하고,\n하향식 통합 테스트에서는 아직 개발되지 않은 하위 모듈을 대신하는 ( ② )을 사용한다.","blanks":[{"a":["테스트 드라이버","드라이버","Test Driver","Driver"]},{"a":["테스트 스텁","스텁","Test Stub","Stub"]}],"expl":"상향식 = 아래부터 올라가니 위(상위)가 없음 → 드라이버. 하향식 = 위부터 내려가니 아래(하위)가 없음 → 스텁."},{"id":122,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"테스트 오라클","ask":"빈칸에 들어갈 알맞은 용어를 쓰시오.","body":"테스트 결과가 올바른지 판단하기 위해 사전에 정의된 참 값을 대입하여 비교하는 기법 및 활동을 ( ① )이라 한다.\n이 중 모든 테스트 케이스의 입력 값에 대해 기대하는 결과를 제공하여, 발생된 모든 오류를 검출할 수 있는 유형을 ( ② )이라 한다.","blanks":[{"a":["테스트 오라클","오라클","Test Oracle"]},{"a":["참 오라클","참","True Oracle"]}],"expl":"오라클 종류: 참(전수), 샘플링(일부), 추정/휴리스틱(일부 + 나머지 추정), 일관성 검사(이전 결과와 비교)."},{"id":123,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"인수 테스트","ask":"빈칸에 들어갈 알맞은 용어를 쓰시오.","body":"개발한 소프트웨어가 사용자의 요구사항을 충족하는지에 중점을 두고 사용자가 직접 수행하는 테스트를 ( ① ) 테스트라 한다.\n이 중 개발자의 장소에서 사용자가 개발자 앞에서 행하는 테스트를 ( ② ) 테스트라 한다.","blanks":[{"a":["인수","인수 테스트","Acceptance","Acceptance Test"]},{"a":["알파","알파 테스트","Alpha","α"]}],"expl":"알파: 개발자 장소, 통제된 환경. 베타: 사용자 장소, 개발자 없이 실제 환경. 테스트 레벨: 단위 → 통합 → 시스템 → 인수."},{"id":124,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"테스트 기본 원리","ask":"다음 설명에 해당하는 소프트웨어 테스트의 원리를 쓰시오.","body":"① 소프트웨어의 잘못된 사항을 찾지 못했다고 해도, 사용자의 요구사항을 만족하지 못하면 품질이 높다고 할 수 없다.\n② 동일한 테스트 케이스로 동일한 테스트를 반복하면 더 이상 결함이 발견되지 않는다.\n③ 애플리케이션의 20%에 해당하는 코드에서 전체 결함의 80%가 발견된다.","blanks":[{"a":["오류-부재의 궤변","오류 부재의 궤변","오류부재의궤변","Absence of Errors Fallacy"]},{"a":["살충제 패러독스","살충제 역설","Pesticide Paradox"]},{"a":["파레토 법칙","결함 집중","파레토","Pareto"]}],"expl":"이 밖에 \"테스팅은 정황에 의존한다\", \"완벽한 테스트는 불가능하다\", \"테스트는 계획부터 시작\" 등의 원리가 있다."},{"id":125,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"시간 복잡도","ask":"다음 알고리즘의 평균 시간 복잡도를 빅오(Big-O) 표기법으로 쓰시오.","body":"① 버블 정렬\n② 이진 탐색","blanks":[{"a":["O(n²)","O(n^2)","O(n2)","O(n*n)"]},{"a":["O(log n)","O(log2 n)","O(logn)","O(log₂n)"]}],"expl":"O(1) \u003c O(log n) \u003c O(n) \u003c O(n log n) \u003c O(n²) \u003c O(2ⁿ). 버블·선택·삽입 정렬은 O(n²), 퀵·힙·합병 정렬은 O(n log n)."},{"id":126,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"클린 코드 원칙","ask":"다음 설명에 해당하는 클린 코드 작성 원칙을 쓰시오.","body":"① 한 번에 한 가지를 처리하도록 코드를 작성하고 클래스/메소드/함수를 최소 단위로 분리한다.\n② 상위 클래스/메소드/함수에서는 간략하게 애플리케이션의 특성을 나타내고, 상세 내용은 하위 클래스/메소드/함수에서 구현한다.","blanks":[{"a":["단순성"]},{"a":["추상화"]}],"expl":"클린 코드 원칙: 가독성, 단순성, 의존성 배제, 중복성 최소화, 추상화."},{"id":127,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"리팩토링","ask":"다음 설명에 해당하는 용어를 쓰시오.","body":"소프트웨어의 기능(외부 동작)은 변경하지 않으면서 내부 구조를 개선하여 코드의 가독성과 유지보수성을 높이는 작업이다.","blanks":[{"a":["리팩토링","리팩터링","Refactoring"]}],"expl":"리팩토링 대상이 되는 냄새 나는 코드: 중복 코드, 긴 메소드, 큰 클래스, 긴 매개변수 목록 등."},{"id":128,"src":"extra","type":"blank","lang":"이론","ch":7,"title":"순환 복잡도","ask":"다음 물음에 답하시오.","body":"① 화이트박스 테스트 기법 중, 대상 프로그램의 제어 흐름 그래프를 분석하여 논리적 복잡성을 측정하고 기본 실행 경로를 정의하는 기법\n② 제어 흐름 그래프의 간선(Edge) 수가 9, 노드(Node) 수가 7일 때 맥케이브 순환 복잡도","blanks":[{"a":["기초 경로 검사","기초 경로 테스트","기본 경로 검사","기초 경로","Base Path Testing","Basis Path Testing"]},{"a":["4"]}],"expl":"순환 복잡도 V(G) = E - N + 2 = 9 - 7 + 2 = 4. (영역 수로 세도 된다: 닫힌 영역 + 1)"},{"id":129,"src":"extra","type":"sql","lang":"SQL","ch":8,"title":"SELECT · ORDER BY","ask":"[학생] 테이블에서 학과가 '컴퓨터'인 학생의 이름과 점수를 점수가 높은 순서로 검색하는 SQL문을 작성하시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"model":"SELECT 이름, 점수 FROM 학생 WHERE 학과 = '컴퓨터' ORDER BY 점수 DESC;","accept":["SELECT 이름, 점수 FROM 학생 WHERE 학과='컴퓨터' ORDER BY 점수 DESC"],"expl":"정렬은 ORDER BY, 내림차순은 DESC(오름차순 ASC는 생략 가능). 문자열은 작은따옴표로 감싼다."},{"id":130,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"SQL 결과: COUNT","ask":"다음 SQL문의 실행 결과를 쓰시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"body":"SELECT COUNT(*) FROM 학생 WHERE 점수 >= 80 AND 학년 = 3;","blanks":[{"a":["2"]}],"expl":"점수 80 이상: 김민수(3학년), 이서연(2), 최유나(3), 한도윤(2). 이 중 3학년은 김민수, 최유나 → 2."},{"id":131,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"SQL 결과: GROUP BY","ask":"다음 SQL문을 실행했을 때 물음에 답하시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"body":"SELECT 학과, AVG(점수) FROM 학생 GROUP BY 학과 HAVING COUNT(*) >= 2;\n\n① 결과 행의 수\n② 컴퓨터 학과의 AVG(점수) 값","blanks":[{"a":["2"]},{"a":["84"]}],"expl":"학과별 인원: 컴퓨터 3, 전자 2, 경영 1 → HAVING으로 경영 제외, 2행. 컴퓨터 평균 = (85+78+89)/3 = 84. 전자는 (92+67)/2 = 79.5."},{"id":132,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"SQL 결과: 서브쿼리","ask":"다음 SQL문의 실행 결과로 출력되는 행의 수를 쓰시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"body":"SELECT 이름 FROM 학생\nWHERE 점수 > (SELECT AVG(점수) FROM 학생);","blanks":[{"a":["4"]}],"expl":"전체 평균 = (85+92+78+95+67+89)/6 = 506/6 ≈ 84.33. 이보다 큰 사람: 김민수 85, 이서연 92, 최유나 95, 한도윤 89 → 4명."},{"id":133,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"SQL 결과: JOIN","ask":"다음 SQL문의 실행 결과를 쓰시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]},{"name":"[학과]","cols":["학과","건물"],"rows":[["컴퓨터","A동"],["전자","B동"],["화학","C동"]]}],"body":"① SELECT COUNT(*) FROM 학생 S JOIN 학과 D ON S.학과 = D.학과;\n② SELECT COUNT(*) FROM 학과 D LEFT OUTER JOIN 학생 S ON D.학과 = S.학과;","blanks":[{"a":["5"]},{"a":["6"]}],"expl":"① 내부 조인: 양쪽에 모두 있는 학과만 → 컴퓨터 3 + 전자 2 = 5 (경영은 [학과]에 없어서 빠짐). ② 왼쪽 외부 조인: [학과]의 모든 행 유지 → 컴퓨터 3 + 전자 2 + 화학 1(학생 쪽 NULL) = 6."},{"id":134,"src":"extra","type":"sql","lang":"SQL","ch":8,"title":"ALTER TABLE","ask":"[학생] 테이블에 가변 길이 문자 15자리의 '전화번호' 속성을 추가하는 SQL문을 작성하시오.","model":"ALTER TABLE 학생 ADD 전화번호 VARCHAR(15);","accept":["ALTER TABLE 학생 ADD COLUMN 전화번호 VARCHAR(15)"],"expl":"ALTER TABLE 테이블명 ADD 속성명 데이터타입; 속성 변경은 ALTER, 삭제는 DROP."},{"id":135,"src":"extra","type":"sql","lang":"SQL","ch":8,"title":"UPDATE","ask":"[학생] 테이블에서 학번이 2305인 학생의 점수를 70으로 수정하는 SQL문을 작성하시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"model":"UPDATE 학생 SET 점수 = 70 WHERE 학번 = 2305;","accept":[],"expl":"UPDATE 테이블 SET 속성 = 값 WHERE 조건; WHERE를 빼먹으면 모든 행이 바뀐다."},{"id":136,"src":"extra","type":"sql","lang":"SQL","ch":8,"title":"INSERT","ask":"[학생] 테이블에 학번 2307, 이름 '윤소희', 학과 '경영', 학년 1, 점수 90인 학생을 삽입하는 SQL문을 작성하시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"model":"INSERT INTO 학생 VALUES (2307, '윤소희', '경영', 1, 90);","accept":["INSERT INTO 학생(학번, 이름, 학과, 학년, 점수) VALUES (2307, '윤소희', '경영', 1, 90)"],"expl":"모든 속성에 값을 넣을 때는 속성명을 생략할 수 있다. INSERT INTO 테이블 [(속성들)] VALUES (값들);"},{"id":137,"src":"extra","type":"sql","lang":"SQL","ch":8,"title":"CREATE VIEW","ask":"[학생] 테이블에서 학과가 '전자'인 학생의 학번과 이름으로 구성된 뷰 '전자학생'을 생성하는 SQL문을 작성하시오.","tables":[{"name":"[학생]","cols":["학번","이름","학과","학년","점수"],"rows":[[2301,"김민수","컴퓨터",3,85],[2302,"이서연","전자",2,92],[2303,"박지훈","컴퓨터",4,78],[2304,"최유나","경영",3,95],[2305,"정하늘","전자",3,67],[2306,"한도윤","컴퓨터",2,89]]}],"model":"CREATE VIEW 전자학생 AS SELECT 학번, 이름 FROM 학생 WHERE 학과 = '전자';","accept":["CREATE VIEW 전자학생(학번, 이름) AS SELECT 학번, 이름 FROM 학생 WHERE 학과 = '전자'"],"expl":"CREATE VIEW 뷰이름 [(속성들)] AS SELECT문; 뷰는 ALTER로 수정할 수 없어서 삭제 후 다시 만든다."},{"id":138,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"GRANT · REVOKE","ask":"빈칸에 들어갈 알맞은 SQL 키워드를 쓰시오.","body":"사용자 KIM에게 [학생] 테이블의 SELECT 권한을 부여하고, KIM이 그 권한을 다른 사용자에게 다시 부여할 수 있게 한다.\n( ① ) SELECT ON 학생 TO KIM ( ② );\n\nKIM의 SELECT 권한을 취소하면서, KIM이 다른 사용자에게 부여한 권한까지 연쇄적으로 취소한다.\nREVOKE SELECT ON 학생 FROM KIM ( ③ );","blanks":[{"a":["GRANT"]},{"a":["WITH GRANT OPTION"]},{"a":["CASCADE"]}],"expl":"DCL: GRANT(권한 부여), REVOKE(권한 취소). WITH GRANT OPTION은 재부여 권한, CASCADE는 연쇄 취소. REVOKE에서 \"권한을 부여할 수 있는 권한만\" 취소할 때는 GRANT OPTION FOR를 쓴다."},{"id":139,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"LIKE · BETWEEN","ask":"빈칸에 들어갈 알맞은 SQL 연산자를 쓰시오.","body":"① 이름이 '김'으로 시작하는 학생 검색\nSELECT * FROM 학생 WHERE 이름 ( ① ) '김%';\n\n② 점수가 80 이상 90 이하인 학생 검색\nSELECT * FROM 학생 WHERE 점수 ( ② ) 80 AND 90;","blanks":[{"a":["LIKE"]},{"a":["BETWEEN"]}],"expl":"LIKE의 %는 0개 이상의 문자, _는 한 문자. BETWEEN A AND B는 A 이상 B 이하(양 끝 포함)."},{"id":140,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"TRUNCATE","ask":"다음 설명에 해당하는 SQL 명령어를 쓰시오.","body":"테이블의 구조는 남겨 두고 테이블 내의 모든 데이터를 삭제하는 DDL 명령어이다. DELETE와 달리 롤백(ROLLBACK)으로 되돌릴 수 없다.","blanks":[{"a":["TRUNCATE","TRUNCATE TABLE"]}],"expl":"DROP: 테이블 자체 삭제(DDL). TRUNCATE: 구조 유지, 데이터 전부 삭제(DDL). DELETE: 조건에 맞는 행 삭제(DML, 롤백 가능)."},{"id":141,"src":"extra","type":"blank","lang":"SQL","ch":8,"title":"트리거","ask":"다음 설명에 해당하는 절차형 SQL을 쓰시오.","body":"데이터베이스 시스템에서 데이터의 삽입(INSERT), 갱신(UPDATE), 삭제(DELETE) 등의 이벤트가 발생할 때마다 관련 작업이 자동으로 수행되는 절차형 SQL이다.","blanks":[{"a":["트리거","Trigger"]}],"expl":"절차형 SQL: 프로시저(호출해서 실행), 트리거(이벤트 발생 시 자동 실행), 사용자 정의 함수(반드시 값을 반환)."},{"id":142,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"보안 3요소","ask":"다음 설명에 해당하는 보안 요소를 쓰시오.","body":"① 시스템 내의 정보와 자원은 인가된 사용자에게만 접근이 허용되며, 정보가 전송 중에 노출되더라도 데이터를 읽을 수 없다.\n② 시스템 내의 정보는 오직 인가된 사용자만 수정할 수 있다.\n③ 인가받은 사용자는 시스템 내의 정보와 자원을 언제라도 사용할 수 있다.","blanks":[{"a":["기밀성","Confidentiality"]},{"a":["무결성","Integrity"]},{"a":["가용성","Availability"]}],"expl":"보안 3요소(CIA): 기밀성, 무결성, 가용성. 여기에 인증, 부인 방지를 더하기도 한다."},{"id":143,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"입력 데이터 검증 취약점","ask":"다음 설명에 해당하는 공격(보안 약점)을 영문 약어 또는 이름으로 쓰시오.","body":"① 웹 응용 프로그램에 SQL을 삽입하여 내부 데이터베이스 서버의 데이터를 유출 및 변조하고, 관리자 인증을 우회한다.\n② 웹페이지에 악의적인 스크립트를 삽입하여 방문자들의 정보를 탈취하거나 비정상적인 기능 수행을 유발한다.\n③ 사용자가 자신의 의지와는 무관하게 공격자가 의도한 행위(수정, 삭제, 등록 등)를 특정 웹사이트에 요청하게 만든다.","blanks":[{"a":["SQL 삽입","SQL Injection","SQL 인젝션"]},{"a":["XSS","크로스 사이트 스크립팅","Cross Site Scripting"]},{"a":["CSRF","사이트 간 요청 위조","Cross Site Request Forgery","XSRF"]}],"expl":"XSS는 \"스크립트 삽입 → 방문자 피해\", CSRF는 \"사용자 권한으로 원치 않는 요청을 보내게 함\"."},{"id":144,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"암호 알고리즘","ask":"다음 설명에 해당하는 암호 알고리즘을 쓰시오.","body":"① 1978년 MIT의 라이베스트, 샤미르, 애들먼이 제안한 공개키 암호 알고리즘으로, 큰 숫자를 소인수분해하기 어렵다는 것에 기반한다.\n② 2001년 미국 표준 기술 연구소(NIST)가 DES의 한계를 느끼고 발표한 대칭키 알고리즘으로, 블록 크기는 128비트이며 키 길이에 따라 128, 192, 256비트로 분류한다.","blanks":[{"a":["RSA"]},{"a":["AES"]}],"expl":"대칭키(개인키): DES, AES, SEED, ARIA, IDEA, RC4. 비대칭키(공개키): RSA, ECC, ElGamal, Diffie-Hellman."},{"id":145,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"해시와 솔트","ask":"빈칸에 들어갈 알맞은 용어를 쓰시오.","body":"임의의 길이의 입력 데이터를 받아 고정된 길이의 값으로 변환하는 일방향 함수를 ( ① )라 한다.\n같은 비밀번호라도 저장된 값이 서로 다르도록 비밀번호에 덧붙이는 무작위 문자열을 ( ② )라 한다.","blanks":[{"a":["해시","해시 함수","Hash","Hash Function"]},{"a":["솔트","Salt"]}],"expl":"해시 알고리즘: SHA 시리즈, MD5, N-NASH, SNEFRU 등. 솔트를 쓰면 레인보우 테이블 공격을 막을 수 있다."},{"id":146,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"세션 하이재킹","ask":"다음 설명에 해당하는 공격 기법을 쓰시오.","body":"상호 인증 과정을 거친 후 접속해 있는 서버와 클라이언트 사이의 세션 정보를 가로채는 공격 기법이다. 정상적인 연결을 RST 패킷으로 끊고 공격자가 그 세션을 이어받아 인증 없이 서버에 접근한다.","blanks":[{"a":["세션 하이재킹","세션하이재킹","Session Hijacking"]}],"expl":"2025년 3회 실기에 나왔다는 복원 후기가 있는 주제. 비슷한 공격: 스니핑(패킷 엿보기), 스푸핑(위장)."},{"id":147,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"스미싱과 피싱","ask":"다음 설명에 해당하는 공격 기법을 쓰시오.","body":"① 문자 메시지(SMS)를 이용하여 사용자의 개인 신용 정보를 빼내거나 악성 앱을 설치하게 만드는 수법\n② 소셜 네트워크에서 악성 링크를 클릭하게 하거나, 금융기관 등을 사칭한 이메일을 보내 개인정보를 빼내는 수법","blanks":[{"a":["스미싱","Smishing"]},{"a":["피싱","Phishing"]}],"expl":"스미싱 = SMS + 피싱. 특정 대상을 노린 피싱은 스피어 피싱(Spear Phishing)."},{"id":148,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"DoS 공격 유형","ask":"다음 설명에 해당하는 서비스 거부(DoS) 공격 유형을 쓰시오.","body":"① 패킷을 전송할 때 송신 IP 주소와 수신 IP 주소를 모두 공격 대상의 IP 주소로 하여 공격 대상에게 전송한다. 공격 대상은 자신에게 응답을 계속 보내게 된다.\n② 출발지 주소를 공격 대상의 IP로 설정하여 네트워크 전체에 ICMP Echo 패킷을 직접 브로드캐스팅하여 마비시킨다.\n③ TCP 3-way-handshake 과정에서 공격자가 SYN 패킷만 대량으로 보내 서버가 대기 상태에 놓이게 만든다.","blanks":[{"a":["LAND Attack","LAND","랜드 어택","LAND 공격"]},{"a":["스머핑","Smurfing","Smurf","스머프"]},{"a":["SYN Flooding","SYN 플러딩","SYN Flood"]}],"expl":"이 밖에 Ping of Death(큰 ICMP 패킷), TearDrop(Offset 조작), Ping Flood 등이 있다."},{"id":149,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"접근 통제","ask":"다음 설명에 해당하는 접근 통제 기법을 영문 약어로 쓰시오.","body":"① 데이터에 접근하는 사용자의 신원에 따라 접근 권한을 부여하며, 데이터 소유자가 접근 통제 권한을 지정한다.\n② 주체와 객체의 등급을 비교하여 접근 권한을 부여하며, 시스템이 접근 통제 권한을 지정한다.\n③ 사용자의 역할에 따라 접근 권한을 부여하며, 중앙 관리자가 접근 통제 권한을 지정한다.","blanks":[{"a":["DAC","임의 접근 통제","Discretionary Access Control"]},{"a":["MAC","강제 접근 통제","Mandatory Access Control"]},{"a":["RBAC","역할 기반 접근 통제","Role Based Access Control"]}],"expl":"DAC = 신원·소유자, MAC = 등급·시스템, RBAC = 역할·중앙 관리자."},{"id":150,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"AAA","ask":"다음 설명에 해당하는 AAA 서버의 기능을 쓰시오.","body":"① 시스템에 접근하는 사용자의 신원을 검증하는 것\n② 신원이 검증된 사용자에게 특정 권한과 서비스를 허용하는 것\n③ 사용자가 어떤 종류의 서비스를 이용했고, 얼마만큼의 리소스를 사용했는지 그 정보를 수집하는 것","blanks":[{"a":["인증","Authentication"]},{"a":["인가","권한 부여","Authorization"]},{"a":["계정 관리","계정관리","Accounting","어카운팅","과금"]}],"expl":"AAA = Authentication(인증), Authorization(인가), Accounting(계정 관리)."},{"id":151,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"APT와 랜섬웨어","ask":"다음 설명에 해당하는 공격을 쓰시오.","body":"① 조직적으로 특정 기업이나 조직 네트워크에 침투해 활동 거점을 마련한 뒤, 때를 기다리면서 보안을 무력화시키고 정보를 수집한 다음 외부로 빼돌리는 지속적·지능적 공격\n② 인터넷 사용자의 컴퓨터에 잠입해 내부 문서나 파일 등을 암호화해 사용자가 열지 못하게 하고, 암호 해독용 프로그램의 전달을 조건으로 금품을 요구하는 악성 프로그램","blanks":[{"a":["APT","지능형 지속 위협","Advanced Persistent Threats","Advanced Persistent Threat"]},{"a":["랜섬웨어","Ransomware"]}],"expl":"APT 공격 방법: 내부자에게 악성 코드 메일 발송, 정상 사이트 감염(워터링 홀), 이동식 저장장치 감염 등."},{"id":152,"src":"extra","type":"blank","lang":"이론","ch":9,"title":"Secure SDLC","ask":"다음 설명에 해당하는 용어를 쓰시오.","body":"보안상 안전한 소프트웨어를 개발하기 위해 소프트웨어 개발 생명주기(SDLC)의 각 단계에 보안 강화 활동을 추가한 것이다. 대표적인 방법론으로 CLASP, SDL, Seven Touchpoints가 있다.","blanks":[{"a":["Secure SDLC","SecureSDLC","시큐어 SDLC"]}],"expl":"SDL은 마이크로소프트가 만든 방법론, Seven Touchpoints는 실무적으로 검증된 7가지 보안 모범사례를 통합한 방법론, CLASP는 운용 중인 시스템에 적용하기 좋은 방법론."},{"id":153,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"OSI 7계층","ask":"다음 설명에 해당하는 OSI 참조 모델의 계층을 쓰시오.","body":"① 두 개의 인접한 개방 시스템들 간에 신뢰성 있고 효율적인 정보 전송을 할 수 있도록 하며, 흐름 제어, 프레임 동기화, 오류 제어 등을 수행한다.\n② 개방 시스템들 간의 네트워크 연결을 관리하며, 경로 설정(Routing), 트래픽 제어, 패킷 정보 전송을 수행한다.\n③ 종단 시스템(End-to-End) 간에 투명한 데이터 전송을 가능하게 하며, TCP와 UDP가 이 계층의 프로토콜이다.","blanks":[{"a":["데이터 링크 계층","데이터 링크","데이터링크","Data Link","Data Link Layer"]},{"a":["네트워크 계층","네트워크","Network","Network Layer"]},{"a":["전송 계층","전송","Transport","Transport Layer"]}],"expl":"아래부터: 물리 → 데이터 링크(프레임, MAC) → 네트워크(패킷, IP, 라우터) → 전송(세그먼트, TCP/UDP) → 세션 → 표현 → 응용."},{"id":154,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"페이지 교체 계산","ask":"페이지 프레임이 3개이고 처음에는 모두 비어 있을 때, 다음 참조 순서에 대해 각 알고리즘의 페이지 부재(Page Fault) 횟수를 구하시오.","body":"참조 페이지 순서: 7, 0, 1, 2, 0, 3, 0, 4\n\n① FIFO\n② LRU","blanks":[{"a":["7","7회","7번"]},{"a":["6","6회","6번"]}],"expl":"FIFO: 7 0 1(부재 3) → 2(7 교체) → 0 적중 → 3(0 교체) → 0(1 교체) → 4(2 교체) = 7회.\nLRU: 7 0 1(3) → 2(가장 오래 안 쓴 7 교체) → 0 적중 → 3(1 교체) → 0 적중 → 4(2 교체) = 6회."},{"id":155,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"스케줄링 계산","ask":"다음 프로세스들이 모두 0초에 도착했을 때, 각 기법의 평균 대기 시간을 구하시오.","tables":[{"name":"","cols":["프로세스","실행 시간"],"rows":[["P1",6],["P2",8],["P3",7],["P4",3]]}],"body":"① FCFS (P1 → P2 → P3 → P4 순서)\n② SJF","blanks":[{"a":["10.25"]},{"a":["7"]}],"expl":"FCFS 대기: P1 0, P2 6, P3 14, P4 21 → 41/4 = 10.25.\nSJF(짧은 것부터 P4 → P1 → P3 → P2) 대기: P4 0, P1 3, P3 9, P2 16 → 28/4 = 7."},{"id":156,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"HRN 스케줄링","ask":"HRN 스케줄링에서 다음 작업 중 가장 먼저 실행되는 작업을 쓰시오.","tables":[{"name":"","cols":["작업","대기 시간","서비스(실행) 시간"],"rows":[["A",5,5],["B",10,20],["C",12,4]]}],"blanks":[{"a":["C"]}],"expl":"HRN 우선순위 = (대기 시간 + 서비스 시간) / 서비스 시간. A = 10/5 = 2, B = 30/20 = 1.5, C = 16/4 = 4 → 값이 가장 큰 C가 먼저."},{"id":157,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"서브넷 계산","ask":"192.168.1.0/24 네트워크를 FLSM 방식으로 4개의 서브넷으로 나누었다. 물음에 답하시오.","body":"① 서브넷 마스크 (10진수 점 표기)\n② 각 서브넷에서 호스트에 할당 가능한 IP 주소 수\n③ 세 번째 서브넷의 브로드캐스트 주소","blanks":[{"a":["255.255.255.192"]},{"a":["62","62개"]},{"a":["192.168.1.191"]}],"expl":"4개로 나누려면 호스트 비트 중 2비트를 빌림 → /26 → 255.255.255.192. 서브넷당 2⁶ = 64개 주소 중 네트워크·브로드캐스트 주소 2개 제외 → 62개. 세 번째 서브넷은 192.168.1.128 ~ .191 → 브로드캐스트 192.168.1.191."},{"id":158,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"IPv6","ask":"빈칸에 들어갈 알맞은 숫자를 쓰시오.","body":"IPv6 주소는 ( ① )비트로 구성되며, 16비트씩 ( ② )개 부분으로 나누어 콜론(:)으로 구분한다.\nIPv4 주소는 ( ③ )비트로 구성된다.","blanks":[{"a":["128"]},{"a":["8"]},{"a":["32"]}],"expl":"IPv6: 128비트, 16비트 × 8, 16진수, 유니캐스트/멀티캐스트/애니캐스트. IPv4: 32비트, 8비트 × 4, 10진수, 유니/멀티/브로드캐스트."},{"id":159,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"인터넷 계층 프로토콜","ask":"다음 설명에 해당하는 프로토콜을 쓰시오.","body":"① 호스트의 IP 주소를 호스트와 연결된 네트워크 접속 장치의 물리적 주소(MAC Address)로 바꾼다.\n② ①과 반대로 물리적 주소를 IP 주소로 변환한다.\n③ IP와 조합하여 통신 중에 발생하는 오류의 처리와 전송 경로 변경 등을 위한 제어 메시지를 관리한다.","blanks":[{"a":["ARP"]},{"a":["RARP"]},{"a":["ICMP"]}],"expl":"인터넷 계층 프로토콜: IP, ICMP, IGMP, ARP, RARP. ping 명령은 ICMP를 사용한다."},{"id":160,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"라우팅 프로토콜","ask":"다음 설명에 해당하는 라우팅 프로토콜을 쓰시오.","body":"① 거리 벡터 라우팅 프로토콜로, 최단 경로 탐색에 Bellman-Ford 알고리즘을 사용하며 최대 홉(Hop) 수를 15로 제한한다.\n② 링크 상태 라우팅 프로토콜로, 다익스트라 알고리즘을 이용하며 대규모 네트워크에 많이 사용된다.\n③ 자율 시스템(AS) 간의 라우팅 프로토콜로, EGP의 단점을 보완하기 위해 만들어졌다.","blanks":[{"a":["RIP"]},{"a":["OSPF"]},{"a":["BGP"]}],"expl":"IGP(AS 내부): RIP, OSPF. EGP(AS 간): BGP."},{"id":161,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"스토리지","ask":"다음 설명에 해당하는 스토리지 방식을 영문 약어로 쓰시오.","body":"① 하드디스크와 같은 데이터 저장장치를 호스트 버스 어댑터에 직접 연결하는 방식\n② 서버와 저장장치를 네트워크를 통해 연결하는 방식으로, 별도의 파일 관리 기능이 있는 NAS Storage가 내장된 저장장치를 직접 관리한다.\n③ 서버와 저장장치를 연결하는 전용 네트워크(광 채널 스위치)를 별도로 구성하는 방식","blanks":[{"a":["DAS","Direct Attached Storage"]},{"a":["NAS","Network Attached Storage"]},{"a":["SAN","Storage Area Network"]}],"expl":"DAS(직접 연결), NAS(네트워크 연결, 파일 서버), SAN(전용 네트워크, 광 채널)."},{"id":162,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"RAID","ask":"다음 설명에 해당하는 RAID 레벨을 쓰시오.","body":"① 패리티 없이 데이터를 여러 디스크에 분산 저장(스트라이핑)하는 방식으로, 속도는 빠르지만 장애 복구가 불가능하다.\n② 같은 데이터를 다른 디스크에 중복 저장(미러링)하는 방식\n③ 패리티 정보를 별도 디스크가 아닌 모든 디스크에 분산 저장하는 방식","blanks":[{"a":["RAID 0","RAID0","0"]},{"a":["RAID 1","RAID1","1"]},{"a":["RAID 5","RAID5","5"]}],"expl":"RAID 0(스트라이핑), 1(미러링), 3·4(전용 패리티 디스크), 5(분산 패리티), 6(패리티 2개)."},{"id":163,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"메모리 배치 전략","ask":"다음과 같이 빈 기억 공간이 있을 때, 14K 크기의 프로그램을 최적 적합(Best Fit) 방법으로 배치하려 한다. 물음에 답하시오.","body":"빈 공간(순서대로): 10K, 30K, 20K, 15K\n\n① 프로그램이 배치되는 빈 공간의 크기\n② 이때 발생하는 내부 단편화의 크기","blanks":[{"a":["15K","15"]},{"a":["1K","1"]}],"expl":"최적 적합: 들어갈 수 있는 공간 중 단편화가 가장 작은 곳 → 15K (단편화 1K). 최초 적합이라면 앞에서부터 처음 들어가는 30K, 최악 적합이라면 가장 큰 30K."},{"id":164,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"교착상태","ask":"빈칸에 들어갈 알맞은 용어를 쓰시오.","body":"교착상태 발생의 필요 충분 조건: 상호 배제, 점유와 대기, ( ① ), 환형 대기\n은행원 알고리즘(Banker's Algorithm)은 교착상태 해결 방법 중 ( ② ) 기법에 해당한다.","blanks":[{"a":["비선점","Non-preemption","No Preemption"]},{"a":["회피","Avoidance"]}],"expl":"해결 방법: 예방(Prevention, 조건 제거), 회피(Avoidance, 은행원 알고리즘), 발견(Detection), 회복(Recovery)."},{"id":165,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"리눅스 권한","ask":"다음 물음에 답하시오.","body":"① 리눅스에서 파일의 접근 권한(퍼미션)을 변경하는 명령어\n② 권한 rwxr-x--x를 8진수 숫자로 표현한 값","blanks":[{"a":["chmod"]},{"a":["751"]}],"expl":"r=4, w=2, x=1. 소유자 rwx = 7, 그룹 r-x = 5, 기타 --x = 1 → 751. 예: chmod 751 file. 소유자 변경은 chown."},{"id":166,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"블록체인과 SDN","ask":"다음 설명에 해당하는 기술을 쓰시오.","body":"① 온라인 금융 거래 정보를 온라인 네트워크 참여자(Peer)의 디지털 장비에 분산 저장하는 기술로, 거래 정보를 블록 단위로 체인처럼 연결해 위·변조를 어렵게 한다.\n② 네트워크를 컴퓨터처럼 모델링하여 여러 사용자가 각각의 소프트웨어로 네트워킹을 가상화하여 제어하고 관리하는 네트워크","blanks":[{"a":["블록체인","Blockchain"]},{"a":["SDN","소프트웨어 정의 네트워킹","소프트웨어 정의 네트워크","Software Defined Networking"]}],"expl":"비슷하게 SDS(Software Defined Storage)는 저장소를 소프트웨어로 가상화해 관리하는 기술."},{"id":167,"src":"extra","type":"blank","lang":"이론","ch":11,"title":"애드 혹 네트워크","ask":"다음 설명에 해당하는 네트워크를 쓰시오.","body":"재난 현장과 같이 별도의 고정된 유선망을 구축할 수 없는 장소에서 모바일 호스트(Mobile Host)만을 이용하여 구성한 네트워크이다. 망을 구성한 후 단기간 사용되는 경우나 유선망을 구성하기 어려운 경우에 적합하다.","blanks":[{"a":["애드 혹 네트워크","애드혹 네트워크","애드혹","Ad-hoc Network","Ad hoc Network","Adhoc"]}],"expl":"메시 네트워크(Mesh Network)는 대규모 디바이스 연결에 특화된 네트워크로, 애드 혹과 구분해 둘 것."},{"id":168,"src":"extra","type":"blank","lang":"이론","ch":12,"title":"DRM 구성 요소","ask":"다음 설명에 해당하는 DRM 구성 요소를 쓰시오.","body":"① 콘텐츠를 메타 데이터와 함께 배포 가능한 형태로 묶어 암호화하는 프로그램\n② 저작권에 대한 사용 권한, 라이선스 발급, 암호화된 키 관리, 사용량에 따른 결제 관리 등을 수행하는 곳","blanks":[{"a":["패키저","Packager"]},{"a":["클리어링 하우스","클리어링하우스","Clearing House"]}],"expl":"DRM 구성: 클리어링 하우스, 콘텐츠 제공자, 패키저, 콘텐츠 분배자, 콘텐츠 소비자, DRM 컨트롤러, 보안 컨테이너."},{"id":169,"src":"extra","type":"blank","lang":"이론","ch":12,"title":"빌드 자동화 도구","ask":"다음 설명에 해당하는 빌드 자동화 도구를 쓰시오.","body":"① Groovy를 기반으로 한 오픈 소스 형태의 빌드 자동화 도구로, 안드로이드 앱 개발 환경에서 사용된다.\n② Java 기반의 오픈 소스 형태로, 가장 많이 사용되는 빌드 자동화 도구이며 서블릿 컨테이너에서 실행되는 서버 기반 도구이다.","blanks":[{"a":["Gradle","그래들"]},{"a":["Jenkins","젠킨스"]}],"expl":"Gradle은 실행할 처리 명령을 모아 태스크로 만든 후 태스크 단위로 실행한다. Jenkins는 SVN, Git 등 대부분의 형상 관리 도구와 연동된다."},{"id":170,"src":"extra","type":"blank","lang":"이론","ch":12,"title":"릴리즈 노트","ask":"다음 설명에 해당하는 문서를 쓰시오.","body":"개발 과정에서 정리된 제품의 릴리즈 정보를 고객과 공유하기 위한 문서로, 테스트 진행 방법, 기능 개선·버그 수정·변경 사항, 사용 환경 등을 포함한다. 소프트웨어의 최초 및 변경, 개선 사항을 정리하여 배포할 때 함께 제공한다.","blanks":[{"a":["릴리즈 노트","릴리스 노트","Release Note","Release Notes"]}],"expl":"릴리즈 노트 구성: 헤더, 개요, 목적, 문제 요약, 재현 항목, 수정/개선 내용, 사용자 영향도, SW 지원 영향도, 노트, 면책 조항, 연락처."},{"id":171,"src":"extra","type":"blank","lang":"이론","ch":12,"title":"버전 관리 용어","ask":"다음 설명에 해당하는 버전 관리 용어를 영문으로 쓰시오.","body":"① 버전 관리를 하고 있지 않은, 아무것도 없는 저장소(Repository)에 처음으로 파일을 복사한다.\n② 프로그램을 수정하기 위해 저장소에서 파일을 받아온다.\n③ 체크인을 수행할 때 이전에 갱신된 내용이 있는 경우 충돌(Conflict)을 알리고 diff 도구를 이용해 수정한 후 갱신을 완료한다.","blanks":[{"a":["Import","임포트"]},{"a":["Check-Out","Checkout","체크아웃"]},{"a":["Commit","커밋"]}],"expl":"Import → Check-Out → (수정) → Check-In → Commit. Update는 저장소의 최신 버전을 작업 공간에 반영, Diff는 버전 간 차이 비교."},{"id":172,"src":"extra","type":"blank","lang":"이론","ch":12,"title":"DRM 기술 요소","ask":"다음 설명에 해당하는 DRM 기술 요소를 쓰시오.","body":"① 크랙에 의한 콘텐츠 사용 방지 기술 (Secure DB, Secure Time Management 등)\n② 라이선스의 내용을 표현하는 기술 (XrML/MPEG-21 REL, ODRL 등)\n③ 콘텐츠에 대한 식별 체계를 표현하는 기술 (DOI, URI 등)","blanks":[{"a":["크랙 방지","Tamper Resistance"]},{"a":["저작권 표현","Right Expression","Rights Expression"]},{"a":["식별 기술","식별","Identification"]}],"expl":"DRM 기술 요소 8가지: 암호화, 키 관리, 암호화 파일 생성(Packager), 식별 기술, 저작권 표현, 정책 관리, 크랙 방지, 인증. 괄호 속 예시 기술(DOI, XrML 등)이 힌트로 같이 나오는 경우가 많다."},{"id":173,"src":"extra","type":"code","lang":"Java","ch":10,"title":"람다와 예외 처리","code":"public class Main {\n\n    static interface F {\n        int apply(int x) throws Exception;\n    }\n\n    public static int run(F f) {\n        try {\n            return f.apply(3);\n        } catch (Exception e) {\n            return 7;\n        }\n    }\n\n    public static void main(String[] args) {\n\n        F f = (x) -> {\n            if (x > 2) {\n                throw new Exception();\n            }\n            return x * 2;\n        };\n\n        System.out.print(run(f) + run((int n) -> n + 9));\n    }\n}","output":"19","expl":"F는 메소드가 apply 하나뿐인 함수형 인터페이스라서 람다로 구현할 수 있다. run(f): f.apply(3)에서 3 > 2가 참이라 예외가 발생 → catch에서 7 반환. run((int n) -> n + 9): apply(3) = 3 + 9 = 12. print 안의 + 는 int끼리 더하기라서 7 + 12 = 19 (문자열 연결 \"712\"가 아님). 함정: 예외가 나면 try의 return은 실행되지 않고 catch의 return이 실행된다."}]</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+const P = JSON.parse(document.getElementById('data').textContent);
+const LS = 'jcg-quiz-v1';
+const store = (() => { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } })();
+store.rec = store.rec || {};          // id -> 'correct' | 'wrong'
+store.draft = store.draft || {};      // id -> 답안 초안
+const F0 = { ch: 'all', lang: 'all', src: 'all', state: 'all' };
+store.f = Object.assign({}, F0, store.f || {});
+function save() { try { localStorage.setItem(LS, JSON.stringify(store)); } catch (e) {} }
+
+const CH = { 1: '요구사항 확인', 2: '데이터 입출력 구현', 3: '통합 구현', 4: '서버 프로그램 구현', 5: '인터페이스 구현', 6: '화면 설계', 7: '애플리케이션 테스트 관리', 8: 'SQL 응용', 9: '소프트웨어 개발 보안 구축', 10: '프로그래밍 언어 활용', 11: '응용 SW 기초 기술 활용', 12: '제품 소프트웨어 패키징' };
+const chs = [...new Set(P.map(p => p.ch))].sort((a, b) => a - b);
+const FILTERS = {
+  ch: [['all', '전체'], ...chs.map(c => [String(c), String(c)])],
+  lang: [['all', '전체'], ['C', 'C'], ['Java', 'Java'], ['Python', 'Python'], ['SQL', 'SQL'], ['이론', '이론']],
+  src: [['all', '전체'], ['book', '본문·기출체크'], ['bank', '예상문제'], ['extra', '추가문제']],
+  state: [['all', '전체'], ['todo', '안 푼 문제'], ['wrong', '틀린 문제']],
+};
+const LANG_KO = { C: 'C', Java: 'Java', Python: 'Python' };
+const NUM = '①②③④⑤⑥⑦⑧⑨⑩';
+document.getElementById('brand-sub').textContent = `1~12장 · ${P.length}문항 (10장 코드 ${P.filter(p => p.type === 'code').length} + 추가 ${P.filter(p => p.src === 'extra').length})`;
+
+let cur = typeof store.cur === 'number' && P.some(p => p.id === store.cur) ? store.cur : 1;
+let graded = null; // 현재 문제의 채점 결과(화면용)
+
+function visible() {
+  const f = store.f;
+  return P.filter(p =>
+    (f.ch === 'all' || String(p.ch) === f.ch) &&
+    (f.lang === 'all' || p.lang === f.lang) &&
+    (f.src === 'all' || p.src === f.src) &&
+    (f.state === 'all' || (f.state === 'todo' ? !store.rec[p.id] : store.rec[p.id] === 'wrong')));
+}
+
+// ---------- 채점 ----------
+function norm(s) {
+  return s.replace(/\r/g, '').replace(/\t/g, '    ').split('\n').map(l => l.replace(/\s+$/, '')).join('\n').replace(/^\n+|\n+$/g, '');
+}
+function squash(s) { return s.replace(/\s+/g, ''); }
+function tokens(s) { return s.replace(/[{}\[\]',"]/g, ' ').replace(/과일명 :/g, ' ').split(/\s+/).filter(Boolean).sort().join('|'); }
+function grade(p, ans) {
+  const a = norm(ans);
+  const targets = [p.output, p.console].filter(Boolean).map(norm);
+  if (targets.includes(a)) return 'exact';
+  if (p.unordered && tokens(a) === tokens(p.output)) return 'exact';
+  if (targets.some(t => squash(t) === squash(a))) return 'space';
+  return 'wrong';
+}
+// 용어 답안: 대소문자·공백·하이픈·괄호·점 무시
+function normTerm(s) { return s.toLowerCase().replace(/[\s\-_.·()'"‘’“”]/g, ''); }
+function gradeBlanks(p, answers) {
+  const hit = (b, a) => !!a.trim() && b.a.some(x => normTerm(x) === normTerm(a));
+  if (!p.anyOrder) return answers.map((a, i) => hit(p.blanks[i], a));
+  const used = new Set();
+  return answers.map(a => {
+    const j = p.blanks.findIndex((b, k) => !used.has(k) && hit(b, a));
+    if (j < 0) return false;
+    used.add(j); return true;
+  });
+}
+function normSql(s) {
+  return s.toUpperCase().replace(/\s+/g, ' ').replace(/\s*([(),=<>;])\s*/g, '$1').replace(/;+$/, '').trim();
+}
+
+// ---------- 렌더링 ----------
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function renderFilters() {
+  document.querySelectorAll('[data-filter]').forEach(box => {
+    const key = box.dataset.filter;
+    box.innerHTML = FILTERS[key].map(([v, l]) => `<button type="button" class="chip" data-v="${v}" aria-pressed="${store.f[key] === v}">${l}</button>`).join('');
+    box.onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      store.f[key] = b.dataset.v; save();
+      const list = visible();
+      if (list.length && !list.some(p => p.id === cur)) go(list[0].id); else render();
+      renderFilters();
+    };
+  });
+  $('#chname').textContent = store.f.ch === 'all' ? '' : `${store.f.ch}장 ${CH[store.f.ch]}`;
+}
+
+function renderSide() {
+  const vals = Object.values(store.rec);
+  const ok = vals.filter(v => v === 'correct').length, bad = vals.filter(v => v === 'wrong').length;
+  $('#s-done').textContent = `${ok + bad}/${P.length}`;
+  $('#s-ok').textContent = ok;
+  $('#s-bad').textContent = bad;
+  $('#bar-g').style.width = (ok / P.length * 100) + '%';
+  $('#bar-r').style.width = (bad / P.length * 100) + '%';
+  const list = visible();
+  $('#map-count').textContent = list.length === P.length ? '' : `· ${list.length}문항`;
+  $('#omr').innerHTML = list.map(p => {
+    const st = store.rec[p.id] || '';
+    return `<button type="button" class="${st} ${p.id === cur ? 'cur' : ''}" data-id="${p.id}" aria-label="문제 ${p.id}${st === 'correct' ? ' 정답' : st === 'wrong' ? ' 오답' : ''}" ${p.id === cur ? 'aria-current="true"' : ''}>${p.id}</button>`;
+  }).join('');
+}
+
+function highlight(p) {
+  const lang = { C: 'c', Java: 'java', Python: 'python' }[p.lang];
+  try { if (window.hljs) return hljs.highlight(p.code, { language: lang, ignoreIllegals: true }).value; } catch (e) {}
+  return esc(p.code);
+}
+
+function markSvg(kind) {
+  if (kind === 'exact') return `<svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M44 9 C 28 2, 6 14, 8 34 C 10 54, 40 60, 54 44 C 62 34, 58 16, 40 10"/></svg>`;
+  if (kind === 'space') return `<svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,8 58,54 6,54"/></svg>`;
+  return `<svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M50 8 L 14 58"/></svg>`;
+}
+
+// 공백 차이가 있는 경우 정답의 공백을 표시
+function showSpaces(s) { return esc(s).replace(/ /g, '<span class="sp"> </span>'); }
+
+function render() {
+  const list = visible();
+  renderSide();
+  const sheet = $('#sheet');
+  if (!list.length) {
+    sheet.innerHTML = `<div class="empty"><h2>${store.f.state === 'wrong' ? '틀린 문제가 없어요' : '조건에 맞는 문제가 없어요'}</h2><p>왼쪽 필터를 바꿔 보세요.</p><button class="btn" type="button" id="clear-f">필터 모두 해제</button></div>`;
+    $('#clear-f').onclick = () => { store.f = Object.assign({}, F0); save(); renderFilters(); render(); };
+    return;
+  }
+  const p = P.find(x => x.id === cur);
+  const idx = list.findIndex(x => x.id === cur);
+  const prev = store.rec[p.id];
+  const ask = p.ask || `다음 ${LANG_KO[p.lang]} 프로그램의 실행 결과를 쓰시오.`;
+  const srcLabel = p.src === 'bank' ? '예상문제은행 · ' + p.title.replace('예상문제 ', '문제 ')
+    : p.src === 'extra' ? `추가문제 · ${p.title}` : p.title.replace(' · ', ' ');
+
+  let stem = '', answerUi = '';
+  if (p.type === 'code') {
+    const lines = p.code.split('\n').length;
+    stem = `${p.input ? `<div class="inputbox"><span>키보드 입력</span><code>${esc(p.input)}</code></div>` : ''}
+      <div class="code"><pre class="ln" aria-hidden="true">${Array.from({ length: lines }, (_, i) => i + 1).join('\n')}</pre><pre><code>${highlight(p)}</code></pre></div>`;
+    answerUi = `<label for="ans">답안 작성란 <kbd>Ctrl+Enter 채점</kbd></label>
+      <textarea id="ans" spellcheck="false" autocomplete="off" placeholder="출력 결과를 그대로 적어 보세요. 줄바꿈도 출력과 똑같이."></textarea>`;
+  } else {
+    stem = `${p.tables ? `<div class="tables">${p.tables.map(tableHtml).join('')}</div>` : ''}
+      ${p.body ? `<div class="qbody${p.lang === 'SQL' ? ' mono' : ''}">${esc(p.body)}</div>` : ''}
+      ${p.choices ? `<div class="choices"><b>보기</b><ul>${p.choices.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>` : ''}`;
+    if (p.type === 'sql') {
+      answerUi = `<label for="ans">답안 작성란 <kbd>Ctrl+Enter 채점</kbd></label>
+        <textarea id="ans" spellcheck="false" autocomplete="off" placeholder="SQL문을 작성하세요."></textarea>`;
+    } else {
+      const one = p.blanks.length === 1;
+      answerUi = `<label>답안 작성란 <kbd>Enter 다음 칸 · 마지막 칸에서 채점</kbd></label>
+        <div class="blanks">${p.blanks.map((b, i) => `<div class="brow"><b>${one ? '답' : NUM[i]}</b><input type="text" id="b${i}" data-i="${i}" autocomplete="off" spellcheck="false" aria-label="${one ? '답' : NUM[i] + '번 답'}"></div>`).join('')}</div>`;
+    }
+  }
+
+  sheet.innerHTML = `
+    <div class="qhead">
+      <div class="qno">문제 ${p.id}<small>${idx + 1} / ${list.length}</small></div>
+      <div class="qsrc">${p.ch}장 ${esc(CH[p.ch])} · ${esc(srcLabel)}</div>
+      <div class="tags">
+        <span class="tag">${p.lang}</span>
+        ${prev ? `<span class="tag prev-${prev}">이전 풀이: ${prev === 'correct' ? '정답' : '오답'}</span>` : ''}
+      </div>
+    </div>
+    <p class="ask">${esc(ask)}</p>
+    ${stem}
+    <div class="answer">
+      ${answerUi}
+      <div class="actions">
+        <button class="btn primary" type="button" id="check">채점하기</button>
+        <button class="btn" type="button" id="reveal">모르겠어요, 정답 보기</button>
+      </div>
+    </div>
+    <div id="result"></div>
+    <div class="nav">
+      <button class="btn" type="button" id="prev" ${idx <= 0 ? 'disabled' : ''}>← 이전</button>
+      <button class="btn" type="button" id="rand">무작위 문제</button>
+      <span class="spacer"></span>
+      <button class="btn" type="button" id="next" ${idx >= list.length - 1 ? 'disabled' : ''}>다음 문제 →</button>
+    </div>`;
+
+  if (p.type === 'blank') {
+    const d = Array.isArray(store.draft[p.id]) ? store.draft[p.id] : [];
+    const inputs = [...document.querySelectorAll('.brow input')];
+    inputs.forEach((inp, i) => {
+      inp.value = d[i] || '';
+      inp.oninput = () => { store.draft[p.id] = inputs.map(x => x.value); save(); };
+      inp.onkeydown = e => {
+        if (e.key !== 'Enter' || e.isComposing) return;
+        e.preventDefault();
+        if (i < inputs.length - 1 && !(e.ctrlKey || e.metaKey)) inputs[i + 1].focus(); else check();
+      };
+    });
+  } else {
+    const ta = $('#ans');
+    ta.value = typeof store.draft[p.id] === 'string' ? store.draft[p.id] : '';
+    ta.oninput = () => { store.draft[p.id] = ta.value; save(); };
+    ta.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); check(); } };
+  }
+  $('#check').onclick = check;
+  $('#reveal').onclick = () => showResult(null);
+  $('#prev').onclick = () => go(list[idx - 1].id);
+  $('#next').onclick = () => go(list[idx + 1].id);
+  $('#rand').onclick = () => {
+    const pool = list.filter(x => x.id !== cur && !store.rec[x.id]);
+    const from = pool.length ? pool : list.filter(x => x.id !== cur);
+    if (from.length) go(from[Math.floor(Math.random() * from.length)].id);
+  };
+  if (graded && graded.id === p.id) showResult(graded.kind, true);
+}
+
+function tableHtml(t) {
+  return `<div class="tbox">${t.name ? `<b>${esc(t.name)}</b>` : ''}<table class="dtable"><thead><tr>${t.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${t.rows.map(r => `<tr>${r.map(v => `<td>${esc(String(v))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function blankAnswers() { return [...document.querySelectorAll('.brow input')].map(x => x.value); }
+
+function check() {
+  const p = P.find(x => x.id === cur);
+  if (p.type === 'blank') {
+    const ans = blankAnswers();
+    if (ans.every(a => !a.trim())) { const f = $('#b0'); f.focus(); f.placeholder = '답을 먼저 적어 주세요. 모르면 "정답 보기"를 누르세요.'; return; }
+    const ok = gradeBlanks(p, ans), n = ok.filter(Boolean).length;
+    const kind = n === ok.length ? 'exact' : n ? 'partial' : 'wrong';
+    record(p.id, kind === 'exact' ? 'correct' : 'wrong');
+    showResult(kind);
+    return;
+  }
+  const ans = $('#ans').value;
+  if (!ans.trim()) { $('#ans').focus(); $('#ans').placeholder = '답을 먼저 적어 주세요. 모르면 "정답 보기"를 누르세요.'; return; }
+  if (p.type === 'sql') {
+    const a = normSql(ans);
+    if ([p.model, ...(p.accept || [])].some(x => normSql(x) === a)) { record(p.id, 'correct'); showResult('exact'); }
+    else showResult('sqlself');
+    return;
+  }
+  if (p.selfGrade) { showResult('self'); return; }
+  const kind = grade(p, ans);
+  record(p.id, kind === 'exact' ? 'correct' : 'wrong');
+  showResult(kind);
+}
+
+function record(id, st) { store.rec[id] = st; save(); renderSide(); }
+
+function showResult(kind, silent) {
+  const p = P.find(x => x.id === cur);
+  graded = { id: p.id, kind };
+  if (kind === null && !silent) record(p.id, 'wrong');
+  const ans = p.type === 'blank' ? '' : norm($('#ans').value);
+  let blankOk = null;
+  if (p.type === 'blank') blankOk = gradeBlanks(p, blankAnswers());
+  const nOk = blankOk ? blankOk.filter(Boolean).length : 0;
+  const heads = {
+    exact: ['정답입니다', p.type === 'code' ? '출력 결과가 정확히 일치해요.' : p.type === 'sql' ? '모범 답안과 같은 SQL문이에요.' : '모두 맞혔어요.'],
+    space: ['거의 맞았어요', '내용은 같지만 공백·줄바꿈이 달라요. 실기에서는 공백과 줄바꿈도 채점 대상이라 오답으로 기록했어요.'],
+    partial: ['일부만 맞았어요', `${p.blanks ? p.blanks.length : 0}칸 중 ${nOk}칸을 맞혔어요. 실기는 부분 점수가 있기도 하지만, 여기서는 오답 노트에 넣어 둘게요.`],
+    wrong: ['틀렸어요', '정답과 해설을 확인해 보세요.'],
+    self: ['스스로 채점해 주세요', '반복 출력이 길어서 자동 채점 대신 직접 비교하는 문제예요.'],
+    sqlself: ['모범 답안과 비교해 보세요', 'SQL은 같은 뜻을 여러 방식으로 쓸 수 있어서, 모범 답안과 똑같지 않으면 직접 채점해요. 키워드 순서, 조건, 따옴표를 확인하세요.'],
+  };
+  const h = kind === null ? ['정답 확인', '오답 노트에 넣어 두었어요. 해설을 읽고 다시 풀어 보세요.'] : heads[kind];
+  const markKind = kind === 'exact' ? 'exact' : kind === 'space' || kind === 'partial' ? 'space' : kind === 'self' || kind === 'sqlself' ? null : 'wrong';
+  const verdict = `<div class="verdict">${markKind ? markSvg(markKind) : ''}<div><h2>${h[0]}</h2><p>${h[1]}</p></div></div>`;
+  const explHtml = `<div class="expl"><b>해설</b><p>${esc(p.expl)}</p></div>`;
+  const selfBtns = `<div class="selfgrade"><button class="btn ok" type="button" id="self-ok">맞았어요</button><button class="btn bad" type="button" id="self-bad">틀렸어요</button></div>`;
+  const overrideBtn = `<div class="selfgrade">답이 맞는데 표기 방식만 달랐나요? <button class="btn ok" type="button" id="override">정답으로 처리</button></div>`;
+
+  if (p.type !== 'code') {
+    let body;
+    if (p.type === 'blank') {
+      const mine = blankAnswers();
+      const one = p.blanks.length === 1;
+      body = `<div class="tblwrap"><table class="gtable"><thead><tr>${one ? '' : '<th></th>'}${kind !== null ? '<th>내 답</th>' : ''}<th>정답</th>${kind !== null ? '<th></th>' : ''}</tr></thead><tbody>
+        ${p.blanks.map((b, i) => `<tr>${one ? '' : `<td class="no">${NUM[i]}</td>`}
+          ${kind !== null ? `<td class="mine">${esc(mine[i] || '') || '<span style="color:var(--muted)">(빈칸)</span>'}</td>` : ''}
+          <td class="ans">${esc(b.a[0])}${b.a.length > 1 ? `<small>인정: ${esc(b.a.slice(1).join(', '))}</small>` : ''}</td>
+          ${kind !== null ? `<td class="v ${blankOk[i] ? 'o' : 'x'}">${blankOk[i] ? '○' : '✕'}</td>` : ''}</tr>`).join('')}
+        </tbody></table></div>
+        ${p.anyOrder ? '<div class="out"><span class="note">이 문제는 빈칸 순서가 바뀌어도 정답이에요.</span></div>' : ''}`;
+    } else {
+      body = `<div class="compare">
+        ${kind !== null ? `<div class="out"><span>내 답</span><pre>${esc(ans)}</pre></div>` : ''}
+        <div class="out right"><span>모범 답안</span><pre>${esc(p.model)}</pre>
+          ${p.accept && p.accept.length ? `<div class="note">이렇게 써도 정답: <code>${p.accept.map(esc).join('</code>, <code>')}</code></div>` : ''}</div>
+      </div>`;
+    }
+    $('#result').innerHTML = `<section class="result">${verdict}${body}${explHtml}
+      ${kind === 'wrong' || kind === 'partial' ? overrideBtn : ''}${kind === 'sqlself' ? selfBtns : ''}</section>`;
+    bindGradeButtons(p, silent);
+    return;
+  }
+
+  const expected = kind === 'space' ? showSpaces(p.output) : esc(p.output);
+
+  $('#result').innerHTML = `
+    <section class="result">
+      ${verdict}
+      <div class="compare">
+        ${kind !== null ? `<div class="out"><span>내 답</span><pre>${kind === 'space' ? showSpaces(ans) : esc(ans)}</pre></div>` : ''}
+        <div class="out right"><span>정답 (실행 결과)</span><pre>${expected}</pre>
+          ${p.unordered ? '<div class="note">세트는 순서가 없어서 원소 순서가 달라도 정답이에요.</div>' : ''}
+          ${p.console ? `<div class="note">실제 콘솔에는 입력 안내 문구까지 붙어서 이렇게 찍혀요: <code>${esc(p.console.replace(/\n/g, ' ⏎ '))}</code></div>` : ''}
+        </div>
+      </div>
+      ${explHtml}
+      ${kind === 'wrong' || kind === 'space' ? overrideBtn : ''}
+      ${kind === 'self' ? selfBtns : ''}
+    </section>`;
+  bindGradeButtons(p, silent);
+}
+
+function bindGradeButtons(p, silent) {
+  const o = $('#override');
+  if (o) o.onclick = () => { record(p.id, 'correct'); o.parentElement.innerHTML = '정답으로 기록했어요.'; };
+  const so = $('#self-ok'), sb = $('#self-bad');
+  if (so) {
+    so.onclick = () => { record(p.id, 'correct'); so.parentElement.innerHTML = '정답으로 기록했어요.'; };
+    sb.onclick = () => { record(p.id, 'wrong'); sb.parentElement.innerHTML = '오답으로 기록했어요.'; };
+  }
+  if (!silent) { const r = $('#result .result'); r && r.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' }); }
+}
+
+function go(id) {
+  cur = id; graded = null; store.cur = id; save(); render();
+  $('#sheet').scrollIntoView({ block: 'start', behavior: 'auto' });
+}
+
+$('#omr').onclick = e => { const b = e.target.closest('button[data-id]'); if (b) go(+b.dataset.id); };
+function askReset() {
+  $('#reset').innerHTML = '모든 풀이 기록을 지울까요? <button class="linkbtn danger" type="button" id="reset-yes">지우기</button><button class="linkbtn" type="button" id="reset-no">취소</button>';
+  $('#reset-yes').onclick = () => { store.rec = {}; store.draft = {}; save(); graded = null; restoreReset(); render(); };
+  $('#reset-no').onclick = restoreReset;
+}
+function restoreReset() {
+  $('#reset').innerHTML = '<button class="linkbtn" id="reset-ask" type="button">풀이 기록 초기화</button>';
+  $('#reset-ask').onclick = askReset;
+}
+$('#reset-ask').onclick = askReset;
+if (matchMedia('(max-width: 860px)').matches) $('#mapbox').open = false;
+
+renderFilters();
+render();
+</script>
+</body>
+</html>

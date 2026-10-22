@@ -2,6 +2,10 @@
 
 [학습 페이지 열기](https://kyeongminn.github.io/ipe-practical-visual-study/)
 
+[코드·SQL·이론 문제풀이 열기](https://kyeongminn.github.io/ipe-practical-visual-study/code-practice.html)
+
+코드 문제풀이 페이지에는 본문·기출체크, 예상문제, 추가문제가 구분되어 있습니다. 핵심이론 페이지와 서로 이동할 수 있습니다. 코드 문제풀이의 글꼴과 구문 강조는 외부 CDN을 사용하며, CDN을 사용할 수 없어도 기본 글꼴과 일반 코드 표시로 풀이할 수 있습니다.
+
 14개 핵심 개념을 그림과 비교표로 정리한 한국어 학습 페이지입니다. 각 개념 카드에서 상세 설명과 정보처리기사 실기 복원 기출 풀이로 이동합니다.
 
 - UML 관계·다이어그램, COCOMO, 디자인 패턴, 네트워크와 라우팅
@@ -23,9 +27,12 @@ Python 3.10 이상과 Node.js 20 이상에서 실행합니다. 추가 패키지 
 ```sh
 python study-assets/build_guide.py
 node study-assets/verify_practical.cjs
+node study-assets/verify_code_practice.cjs
 ```
 
 생성기는 두 HTML 파일에 같은 내용을 저장합니다. 문제와 출처 데이터는 `study-assets/practical_bank.py`에서 관리합니다. 검증 스크립트는 문항 메타데이터·마크업·실제 채점 이벤트 코드의 동작을 확인합니다.
+
+코드 문제풀이의 원본은 `정처기_실기_코드문제풀이.html`입니다. 생성기는 이 파일을 배포용 `code-practice.html`로 복사합니다. 원본을 수정한 후 위 생성·검증 명령을 실행하면 됩니다.
 
 ## 배포
 
