@@ -25,6 +25,7 @@ SOURCES={
 PRACTICE_NOTES={
  'storage':'DAS·NAS·SAN은 회차·출처가 확인된 실기 복원 기출을 아직 연결하지 않았습니다. 코드 문제풀이 페이지 161번은 직접 작성한 개념 확인 문제입니다.',
  'algorithms':'정렬·탐색의 시간복잡도는 회차·출처가 확인된 실기 복원 기출을 아직 연결하지 않았습니다. 코드 문제풀이 페이지의 버블 정렬 코드 문제와 추가문제 7장 “시간 복잡도”는 직접 작성한 확인 문제입니다.',
+ 'interface-tools':'인터페이스 구현 검증 도구는 회차·출처가 확인된 실기 복원 기출을 아직 연결하지 않았습니다. 코드 문제풀이 페이지 추가문제 5장 “인터페이스 구현 검증 도구”는 직접 작성한 확인 문제입니다.',
  'cocomo':'연관 실기 기출: 아래 문항은 COCOMO 유형을 직접 묻는 문제가 아니라 같은 비용·일정 산정 영역의 LOC 계산 기출입니다.',
  'drm-components':'연관 실기 기출: 개편 전 전산영어에서 출제된 DRM 식별 소문항입니다. 구성요소 7개의 이름을 각각 묻는 기출로 바꿔 표시하지 않았습니다.',
  'drm-technologies':'연관 실기 기출: DRM 보호 기술을 식별하는 개편 전 전산영어 소문항입니다. DRM 구성요소 페이지와 같은 출제 문항을 연결했으며, 기술요소 8개를 각각 묻는 기출은 아닙니다.',
@@ -37,7 +38,7 @@ def package_picture():
     return svg(drawing,'원문 폴더 형태 기호를 개념적으로 다시 그린 그림',178)
 
 def build_practical_bank(question,field):
-    bank={key:[] for key in ['uml-rel','uml-types','cocomo','patterns','network','whitebox','principles','security-cia','drm-components','drm-technologies','routing-protocols','version-control','encryption','attacks','storage','security-protocols','osi-layers','algorithms']}
+    bank={key:[] for key in ['uml-rel','uml-types','cocomo','patterns','network','whitebox','principles','security-cia','drm-components','drm-technologies','routing-protocols','version-control','encryption','attacks','storage','security-protocols','osi-layers','algorithms','interface-tools']}
     def add(key,slug,year,round,title,prompt,fields,explain,source,locator,*,part='',related='',visual='',self_check=False,page=None,canonical=None):
         label,url=SOURCES[source]
         if page:url+=f'#page={page}'
@@ -149,5 +150,5 @@ def build_practical_bank(question,field):
     add('osi-layers','physical-2020-1',2020,1,'비트 스트림을 전송하는 계층','여러 전송 매체로 비트 스트림을 보내며, 두 장치의 실제 접속·절단과 기계적·전기적·기능적·절차적 특성을 규정하는 OSI 계층은?',[field('계층 이름','물리 계층','물리','물리층','Physical Layer','Physical')],
         '1계층인 물리 계층입니다. 비트 스트림과 전송 매체의 물리적 특성을 연결해 기억합니다.','gilbut2020','2020년 1회 실기 · 비트 스트림과 물리적 접속을 설명한 계층 식별 문항',page=167)
 
-    assert all(qs for key,qs in bank.items() if key not in ('storage','algorithms')), 'Known practical-exam concepts must keep checked questions.'
+    assert all(qs for key,qs in bank.items() if key not in ('storage','algorithms','interface-tools')), 'Known practical-exam concepts must keep checked questions.'
     return bank
